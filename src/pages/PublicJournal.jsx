@@ -1,30 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'
-import { useNavigate } from 'react-router-dom'
+import { collection, getDocs, orderBy, query, where } from 'firebase/firestore'
+import { useNavigate, useParams } from 'react-router-dom'
 import { db } from '../firebase/config'
+import { useAuth } from '../context/AuthContext'
 import { useMapCoords } from '../context/MapCoordsContext'
 import styles from './Journal.module.css'
 
 export default function PublicJournal() {
+  const { username } = useParams()
+  const { user } = useAuth()
   const { setCoords } = useMapCoords()
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
   const hoverTimer = useRef(null)
   const navigate = useNavigate()
 
   useEffect(() => {
+    setCoords({ lat: null, lng: null })
     async function fetchEntries() {
-      const q = query(collection(db, 'entries'), orderBy('date', 'desc'))
+      // Look up uid from username
+      const userSnap = await getDocs(query(collection(db, 'users'), where('username', '==', username)))
+      if (userSnap.empty) { setNotFound(true); setLoading(false); return }
+      const uid = userSnap.docs[0].id
+      const q = query(collection(db, 'entries'), where('uid', '==', uid), orderBy('date', 'desc'))
       const snapshot = await getDocs(q)
       setEntries(snapshot.docs.map(d => ({ id: d.id, ...d.data() })))
       setLoading(false)
     }
     fetchEntries()
-  }, [])
-
-  useEffect(() => {
-    setCoords({ lat: null, lng: null })
-  }, [])
+  }, [username])
 
   function formatDate(timestamp) {
     return timestamp.toDate().toLocaleDateString('en-US', {
@@ -32,21 +37,27 @@ export default function PublicJournal() {
     })
   }
 
+  if (notFound) return (
+    <main className={styles.feedCol}>
+      <div className={styles.headerActions}>
+        <span className={styles.navBtn}>Journal not found.</span>
+      </div>
+    </main>
+  )
+
   return (
     <main className={styles.feedCol}>
       <div className={styles.loggedIn}>
         <div className={styles.headerActions}>
-          <button onClick={() => navigate('/journal')} className={styles.navBtn}>Admin</button>
+          <span className={styles.logo}>{username}</span>
+          {user && (
+            <button onClick={() => navigate('/journal')} className={styles.navBtn}>Admin</button>
+          )}
         </div>
 
         <div className={styles.scrollable}>
           {loading && <div className={styles.loading}>Loading…</div>}
 
-          {!loading && entries.length === 0 && (
-            <div className={styles.empty}>
-              <p className={styles.emptyText}>No entries yet.</p>
-            </div>
-          )}
 
           {entries.length > 0 && (
             <div className={styles.feed}>
@@ -76,7 +87,7 @@ export default function PublicJournal() {
                     )}
                     <h2
                       className={styles.title}
-                      onClick={() => navigate(`/entry/${entry.id}`)}
+                      onClick={() => navigate(`/u/${username}/entry/${entry.id}`)}
                     >
                       {entry.title}
                     </h2>

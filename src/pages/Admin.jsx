@@ -7,6 +7,7 @@ import { uploadImage } from '../utils/uploadImage'
 import { uploadVideo } from '../utils/uploadVideo'
 import { loadGoogleMaps } from '../utils/loadGoogleMaps'
 import { useMapCoords } from '../context/MapCoordsContext'
+import { useAuth } from '../context/AuthContext'
 import styles from './Admin.module.css'
 
 const EMPTY_FORM = { title: '', date: '', locationName: '', notes: '' }
@@ -17,6 +18,11 @@ export default function Admin() {
   const { id } = useParams()
   const isEdit = Boolean(id)
   const { setCoords } = useMapCoords()
+  const { username } = useAuth()
+
+  useEffect(() => {
+    if (username === null) navigate('/setup')
+  }, [username])
 
   const [form, setForm] = useState(EMPTY_FORM)
   const [mediaItems, setMediaItems] = useState([])
@@ -171,7 +177,7 @@ export default function Admin() {
         await updateDoc(doc(db, 'entries', id), entryData)
         navigate(`/entry/${id}`)
       } else {
-        await addDoc(collection(db, 'entries'), { ...entryData, createdAt: Timestamp.now() })
+        await addDoc(collection(db, 'entries'), { ...entryData, createdAt: Timestamp.now(), uid: auth.currentUser.uid })
         mediaItems.filter(i => !i.saved).forEach(i => URL.revokeObjectURL(i.src))
         navigate('/journal')
       }

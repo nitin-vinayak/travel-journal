@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { collection, getDocs, orderBy, query, deleteDoc, doc } from 'firebase/firestore'
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { collection, getDocs, orderBy, query, where, deleteDoc, doc } from 'firebase/firestore'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
 import { db, auth } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
@@ -8,7 +8,7 @@ import { useMapCoords } from '../context/MapCoordsContext'
 import styles from './Journal.module.css'
 
 export default function Journal() {
-  const { user } = useAuth()
+  const { user, username } = useAuth()
   const { setCoords } = useMapCoords()
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(false)
@@ -25,10 +25,14 @@ export default function Journal() {
   const [loginLoading, setLoginLoading] = useState(false)
 
   useEffect(() => {
+    if (user && username === null) navigate('/setup')
+  }, [user, username])
+
+  useEffect(() => {
     if (!user) return
     setLoading(true)
     async function fetchEntries() {
-      const q = query(collection(db, 'entries'), orderBy('date', 'desc'))
+      const q = query(collection(db, 'entries'), where('uid', '==', user.uid), orderBy('date', 'desc'))
       const snapshot = await getDocs(q)
       setEntries(snapshot.docs.map(d => ({ id: d.id, ...d.data() })))
       setLoading(false)
@@ -47,8 +51,18 @@ export default function Journal() {
     setLoginLoading(true)
     try {
       await signInWithEmailAndPassword(auth, email, password)
-    } catch {
-      setLoginError('Invalid email or password.')
+    } catch (err) {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password)
+        } catch (createErr) {
+          setLoginError(createErr.code === 'auth/weak-password'
+            ? 'Password must be at least 6 characters.'
+            : 'Invalid email or password.')
+        }
+      } else {
+        setLoginError('Invalid email or password.')
+      }
     } finally {
       setLoginLoading(false)
     }
@@ -139,7 +153,10 @@ export default function Journal() {
               <>
                 <button onClick={() => navigate('/admin')} className={styles.navBtn}>New Entry</button>
                 <button onClick={toggleEditMode} className={styles.editModeBtn}>Edit</button>
-                <button onClick={handleLogout} className={styles.logoutBtn}>Sign out</button>
+                {username && (
+                  <button onClick={() => navigate(`/u/${username}`)} className={styles.navBtn}>Public</button>
+                )}
+                <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
               </>
             ) : (
               <>
@@ -154,14 +171,6 @@ export default function Journal() {
           </div>
 
           <div className={styles.scrollable}>
-            {!loading && entries.length === 0 && (
-              <div className={styles.empty}>
-                <p className={styles.emptyText}>No entries yet.</p>
-                <button onClick={() => navigate('/admin')} className={styles.emptyBtn}>
-                  Write your first entry
-                </button>
-              </div>
-            )}
 
             {entries.length > 0 && (
               <div className={styles.feed}>

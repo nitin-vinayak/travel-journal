@@ -6,7 +6,7 @@ import { useMapCoords } from '../context/MapCoordsContext'
 import styles from './Entry.module.css'
 
 export default function PublicEntry() {
-  const { id } = useParams()
+  const { username, id } = useParams()
   const navigate = useNavigate()
   const { setCoords } = useMapCoords()
   const [entry, setEntry] = useState(null)
@@ -57,7 +57,7 @@ export default function PublicEntry() {
     <main className={styles.entryCol}>
 
       <div className={styles.fixedActions}>
-        <button onClick={() => navigate('/')} className={styles.backBtn}>Journal</button>
+        <button onClick={() => navigate(`/u/${username}`)} className={styles.backBtn}>Journal</button>
       </div>
 
       <div className={styles.scrollable}>

@@ -7,19 +7,26 @@ import Admin from './pages/Admin'
 import Entry from './pages/Entry'
 import PublicJournal from './pages/PublicJournal'
 import PublicEntry from './pages/PublicEntry'
+import SetUsername from './pages/SetUsername'
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Navigate to="/journal" replace />} />
           <Route path="/login" element={<Navigate to="/journal" replace />} />
 
           {/* Routes that share the persistent globe layout */}
           <Route element={<MapLayout />}>
+            {/* Username setup */}
+            <Route path="/setup" element={
+              <ProtectedRoute><SetUsername /></ProtectedRoute>
+            } />
+
             {/* Public read-only routes */}
-            <Route path="/" element={<PublicJournal />} />
-            <Route path="/entry/:id" element={<PublicEntry />} />
+            <Route path="/u/:username" element={<PublicJournal />} />
+            <Route path="/u/:username/entry/:id" element={<PublicEntry />} />
 
             {/* Private admin routes */}
             <Route path="/journal" element={<Journal />} />

@@ -47,30 +47,29 @@
 }
 
 .deleteBtn {
-  padding: 6px 12px;
-  background: #000;
+  padding: 0;
+  background: transparent;
   border: none;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
-  color: #fff;
-  transition: opacity 0.15s;
+  color: #999;
+  transition: color 0.2s ease;
 }
 
-.deleteBtn:hover:not(:disabled) { opacity: 0.7; }
+.deleteBtn:hover:not(:disabled) { color: #c00; }
 .deleteBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .cancelBtn {
-  padding: 6px 12px;
+  padding: 0;
   background: transparent;
-  border: 1px solid #000;
-  font-size: 0.78rem;
+  border: none;
+  font-size: 0.9rem;
   cursor: pointer;
-  color: #000;
-  transition: opacity 0.15s;
+  color: #999;
+  transition: color 0.2s ease;
 }
 
-.cancelBtn:hover { opacity: 0.5; }
+.cancelBtn:hover { color: #000; }
 
 .selected {
   opacity: 0.5;
