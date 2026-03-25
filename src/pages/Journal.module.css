@@ -20,11 +20,9 @@
 
 .feedCol::-webkit-scrollbar { display: none; }
 
-.globeCol {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.mapCol {
   overflow: hidden;
+  position: relative;
 }
 
 .logo {

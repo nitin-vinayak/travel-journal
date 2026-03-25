@@ -3,7 +3,7 @@ import { collection, getDocs, orderBy, query, deleteDoc, doc } from 'firebase/fi
 import { signOut } from 'firebase/auth'
 import { useNavigate } from 'react-router-dom'
 import { db, auth } from '../firebase/config'
-import GlobeViz from '../components/GlobeViz'
+import MapboxViz from '../components/MapboxViz'
 import styles from './Journal.module.css'
 
 export default function Journal() {
@@ -108,6 +108,9 @@ export default function Journal() {
                   }}
                   onMouseLeave={() => {
                     clearTimeout(hoverTimer.current)
+                    hoverTimer.current = setTimeout(() => {
+                      setHoveredCoords({ lat: null, lng: null })
+                    }, 150)
                   }}
                 >
                   {editMode && (
@@ -135,9 +138,10 @@ export default function Journal() {
           )}
         </main>
 
-        <div className={styles.globeCol}>
-          <GlobeViz lat={hoveredCoords.lat} lng={hoveredCoords.lng} />
+        <div className={styles.mapCol}>
+          <MapboxViz lat={hoveredCoords.lat} lng={hoveredCoords.lng} />
         </div>
+
       </div>
     </div>
   )
