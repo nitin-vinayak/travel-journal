@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
-import Login from './pages/Login'
 import Admin from './pages/Admin'
 import Journal from './pages/Journal'
 import Entry from './pages/Entry'
@@ -12,12 +11,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/journal" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/journal" element={
-            <ProtectedRoute>
-              <Journal />
-            </ProtectedRoute>
-          } />
+          <Route path="/login" element={<Navigate to="/journal" replace />} />
+          <Route path="/journal" element={<Journal />} />
           <Route path="/admin" element={
             <ProtectedRoute>
               <Admin />

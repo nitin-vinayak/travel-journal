@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import styles from './MapboxViz.module.css'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
 
@@ -22,10 +23,10 @@ export default function MapboxViz({ lat, lng }) {
       pitch: 0,
       bearing: 0,
       antialias: true,
+      attributionControl: false,
     })
 
     map.on('style.load', () => {
-      readyRef.current = true
       map.setFog({
         'color': '#ffffff',
         'high-color': '#ffffff',
@@ -33,6 +34,11 @@ export default function MapboxViz({ lat, lng }) {
         'star-intensity': 0,
         'horizon-blend': 0.02,
       })
+    })
+
+    map.once('idle', () => {
+      readyRef.current = true
+      containerRef.current.classList.add(styles.ready)
       map.flyTo({
         center: DEFAULT_CENTER,
         zoom: DEFAULT_ZOOM,
@@ -79,5 +85,5 @@ export default function MapboxViz({ lat, lng }) {
     }
   }, [lat, lng])
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100%', background: '#fff' }} />
+  return <div ref={containerRef} className={styles.container} />
 }

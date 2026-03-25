@@ -247,6 +247,101 @@
 
 .photoItem:hover .photo { opacity: 0.85; }
 
+/* Login form (renders in feedCol) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.loginWrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: fit-content;
+  margin: 0 auto;
+  animation: fadeIn 3.5s ease both;
+}
+
+.loginTitle {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.loginSub {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 48px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 416px;
+}
+
+.loginField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.loginLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.loginInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  font-size: 0.9rem;
+  color: #000;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.loginInput:focus {
+  border-bottom-color: #000;
+}
+
+.loginInput::placeholder {
+  color: #ccc;
+}
+
+.loginError {
+  font-size: 0.8rem;
+  color: #c00;
+  margin: 0;
+}
+
+.loginBtn {
+  margin-top: 8px;
+  padding: 10px 0;
+  background: #000;
+  color: #fff;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: opacity 0.15s;
+  width: 100%;
+}
+
+.loginBtn:hover:not(:disabled) { opacity: 0.7; }
+.loginBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
 @media (max-width: 600px) {
   .main { padding: 24px 16px; }
   .header { padding: 12px 16px; }
