@@ -153,6 +153,7 @@
 
 .entry {
   padding: 28px 0;
+  width: fit-content;
 }
 
 .entry:first-child {
