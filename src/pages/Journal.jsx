@@ -168,7 +168,7 @@ export default function Journal() {
                 {entries.map(entry => (
                   <article
                     key={entry.id}
-                    className={`${styles.entry} ${editMode && selected.has(entry.id) ? styles.selected : ''}`}
+                    className={`${styles.entry} ${editMode ? styles.editMode : ''} ${editMode && selected.has(entry.id) ? styles.selected : ''}`}
                     onClick={editMode ? () => toggleSelect(entry.id) : undefined}
                     onMouseEnter={() => {
                       clearTimeout(hoverTimer.current)
@@ -183,23 +183,21 @@ export default function Journal() {
                       }, 150)
                     }}
                   >
-                    {editMode && (
-                      <div className={styles.checkbox}>
-                        <div style={{ width: 10, height: 10, background: selected.has(entry.id) ? '#000' : 'transparent' }} />
-                      </div>
-                    )}
-                    <div className={styles.meta}>
-                      <span className={styles.date}>{formatDate(entry.date)}</span>
+                    <div className={styles.timeline}>
+                      <div className={styles.node} />
+                    </div>
+                    <div className={styles.entryContent}>
                       {entry.locationName && (
                         <span className={styles.location}>{entry.locationName}</span>
                       )}
+                      <h2
+                        className={styles.title}
+                        onClick={!editMode ? () => navigate(`/entry/${entry.id}`) : undefined}
+                      >
+                        {entry.title}
+                      </h2>
+                      <span className={styles.date}>{formatDate(entry.date)}</span>
                     </div>
-                    <h2
-                      className={styles.title}
-                      onClick={!editMode ? () => navigate(`/entry/${entry.id}`) : undefined}
-                    >
-                      {entry.title}
-                    </h2>
                   </article>
                 ))}
               </div>

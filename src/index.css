@@ -1,3 +1,73 @@
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-Regular-Trial.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-RegularItalic-Trial.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-Light-Trial.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-LightItalic-Trial.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-Medium-Trial.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-MediumItalic-Trial.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-Bold-Trial.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-BoldItalic-Trial.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-Black-Trial.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Silvana';
+  src: url('/fonts/Silvana-BlackItalic-Trial.otf') format('opentype');
+  font-weight: 900;
+  font-style: italic;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
