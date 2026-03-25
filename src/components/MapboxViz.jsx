@@ -25,6 +25,9 @@ export default function MapboxViz({ lat, lng }) {
       bearing: 0,
       antialias: true,
       attributionControl: false,
+      fadeDuration: 0,
+      maxTileCacheSize: 1000,
+      renderWorldCopies: false,
     })
 
     map.on('style.load', () => {
@@ -43,9 +46,9 @@ export default function MapboxViz({ lat, lng }) {
       const { lat, lng } = coordsRef.current
       if (lat != null && lng != null) {
         markerRef.current.setLngLat([lng, lat]).addTo(map)
-        map.flyTo({ center: [lng, lat], zoom: 15, pitch: 55, bearing: -15, duration: 7000, curve: 3, essential: true })
+        map.flyTo({ center: [lng, lat], zoom: 13, pitch: 55, bearing: -15, duration: 7000, curve: 3, essential: true })
       } else {
-        map.flyTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, pitch: 0, bearing: 0, duration: 2500, curve: 2, essential: true })
+        map.flyTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, pitch: 0, bearing: 0, duration: 4000, curve: 1, essential: true })
       }
     })
 
@@ -70,7 +73,7 @@ export default function MapboxViz({ lat, lng }) {
       markerRef.current.setLngLat([lng, lat]).addTo(map)
       map.flyTo({
         center: [lng, lat],
-        zoom: 15,
+        zoom: 13,
         pitch: 55,
         bearing: -15,
         duration: 7000,
@@ -84,8 +87,8 @@ export default function MapboxViz({ lat, lng }) {
         zoom: DEFAULT_ZOOM,
         pitch: 0,
         bearing: 0,
-        duration: 4000,
-        curve: 2,
+        duration: 4500,
+        curve: 1,
         essential: true,
       })
     }
