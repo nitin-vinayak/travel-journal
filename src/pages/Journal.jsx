@@ -133,7 +133,7 @@ export default function Journal() {
 
       {/* ── Logged in: show entries ── */}
       {user && (
-        <>
+        <div className={styles.loggedIn}>
           <div className={styles.headerActions}>
             {!editMode ? (
               <>
@@ -154,8 +154,6 @@ export default function Journal() {
           </div>
 
           <div className={styles.scrollable}>
-            {loading && <p className={styles.loading}>Loading…</p>}
-
             {!loading && entries.length === 0 && (
               <div className={styles.empty}>
                 <p className={styles.emptyText}>No entries yet.</p>
@@ -165,7 +163,7 @@ export default function Journal() {
               </div>
             )}
 
-            {!loading && entries.length > 0 && (
+            {entries.length > 0 && (
               <div className={styles.feed}>
                 {entries.map(entry => (
                   <article
@@ -207,7 +205,7 @@ export default function Journal() {
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </main>
   )

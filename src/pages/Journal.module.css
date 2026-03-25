@@ -154,6 +154,7 @@
 .feed {
   display: flex;
   flex-direction: column;
+  animation: fadeIn 1.2s ease-out both;
 }
 
 .entry {
@@ -237,6 +238,13 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+.loggedIn {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .loginWrap {
