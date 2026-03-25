@@ -153,58 +153,60 @@ export default function Journal() {
             )}
           </div>
 
-          {loading && <p className={styles.loading}>Loading…</p>}
+          <div className={styles.scrollable}>
+            {loading && <p className={styles.loading}>Loading…</p>}
 
-          {!loading && entries.length === 0 && (
-            <div className={styles.empty}>
-              <p className={styles.emptyText}>No entries yet.</p>
-              <button onClick={() => navigate('/admin')} className={styles.emptyBtn}>
-                Write your first entry
-              </button>
-            </div>
-          )}
+            {!loading && entries.length === 0 && (
+              <div className={styles.empty}>
+                <p className={styles.emptyText}>No entries yet.</p>
+                <button onClick={() => navigate('/admin')} className={styles.emptyBtn}>
+                  Write your first entry
+                </button>
+              </div>
+            )}
 
-          {!loading && entries.length > 0 && (
-            <div className={styles.feed}>
-              {entries.map(entry => (
-                <article
-                  key={entry.id}
-                  className={`${styles.entry} ${editMode && selected.has(entry.id) ? styles.selected : ''}`}
-                  onClick={editMode ? () => toggleSelect(entry.id) : undefined}
-                  onMouseEnter={() => {
-                    clearTimeout(hoverTimer.current)
-                    hoverTimer.current = setTimeout(() => {
-                      setCoords({ lat: entry.lat ?? null, lng: entry.lng ?? null })
-                    }, 400)
-                  }}
-                  onMouseLeave={() => {
-                    clearTimeout(hoverTimer.current)
-                    hoverTimer.current = setTimeout(() => {
-                      setCoords({ lat: null, lng: null })
-                    }, 150)
-                  }}
-                >
-                  {editMode && (
-                    <div className={styles.checkbox}>
-                      <div style={{ width: 10, height: 10, background: selected.has(entry.id) ? '#000' : 'transparent' }} />
-                    </div>
-                  )}
-                  <div className={styles.meta}>
-                    <span className={styles.date}>{formatDate(entry.date)}</span>
-                    {entry.locationName && (
-                      <span className={styles.location}>{entry.locationName}</span>
-                    )}
-                  </div>
-                  <h2
-                    className={styles.title}
-                    onClick={!editMode ? () => navigate(`/entry/${entry.id}`) : undefined}
+            {!loading && entries.length > 0 && (
+              <div className={styles.feed}>
+                {entries.map(entry => (
+                  <article
+                    key={entry.id}
+                    className={`${styles.entry} ${editMode && selected.has(entry.id) ? styles.selected : ''}`}
+                    onClick={editMode ? () => toggleSelect(entry.id) : undefined}
+                    onMouseEnter={() => {
+                      clearTimeout(hoverTimer.current)
+                      hoverTimer.current = setTimeout(() => {
+                        setCoords({ lat: entry.lat ?? null, lng: entry.lng ?? null })
+                      }, 400)
+                    }}
+                    onMouseLeave={() => {
+                      clearTimeout(hoverTimer.current)
+                      hoverTimer.current = setTimeout(() => {
+                        setCoords({ lat: null, lng: null })
+                      }, 150)
+                    }}
                   >
-                    {entry.title}
-                  </h2>
-                </article>
-              ))}
-            </div>
-          )}
+                    {editMode && (
+                      <div className={styles.checkbox}>
+                        <div style={{ width: 10, height: 10, background: selected.has(entry.id) ? '#000' : 'transparent' }} />
+                      </div>
+                    )}
+                    <div className={styles.meta}>
+                      <span className={styles.date}>{formatDate(entry.date)}</span>
+                      {entry.locationName && (
+                        <span className={styles.location}>{entry.locationName}</span>
+                      )}
+                    </div>
+                    <h2
+                      className={styles.title}
+                      onClick={!editMode ? () => navigate(`/entry/${entry.id}`) : undefined}
+                    >
+                      {entry.title}
+                    </h2>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
     </main>
