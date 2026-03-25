@@ -48,10 +48,12 @@ export default function Admin() {
           notes: data.notes ?? '',
         })
         // Support both new media array and legacy photos/videos arrays
-        const saved = data.media ?? [
-          ...(data.photos ?? []).map(url => ({ src: url, type: 'image', saved: true })),
-          ...(data.videos ?? []).map(url => ({ src: url, type: 'video', saved: true })),
-        ]
+        const saved = data.media
+          ? data.media.map(m => ({ src: m.url, type: m.type, saved: true }))
+          : [
+              ...(data.photos ?? []).map(url => ({ src: url, type: 'image', saved: true })),
+              ...(data.videos ?? []).map(url => ({ src: url, type: 'video', saved: true })),
+            ]
         setMediaItems(saved)
         const coords = { lat: data.lat ?? null, lng: data.lng ?? null }
         setLocationCoords(coords)
