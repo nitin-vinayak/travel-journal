@@ -27,11 +27,10 @@ export default function Entry() {
     fetchEntry()
   }, [id])
 
-
   useEffect(() => {
     function onKey(e) {
       if (lightbox === null) return
-      if (e.key === 'ArrowRight') setLightbox(i => Math.min(i + 1, entry.photos.length - 1))
+      if (e.key === 'ArrowRight') setLightbox(i => Math.min(i + 1, lbPhotos.length - 1))
       if (e.key === 'ArrowLeft')  setLightbox(i => Math.max(i - 1, 0))
       if (e.key === 'Escape')     setLightbox(null)
     }
@@ -53,7 +52,14 @@ export default function Entry() {
   if (loading) return <div className={styles.loading}>Loading…</div>
   if (!entry)  return <div className={styles.loading}>Entry not found.</div>
 
-  const photos = entry.photos ?? []
+  // Support new media array and legacy photos/videos arrays
+  const media = entry.media ?? [
+    ...(entry.photos ?? []).map(url => ({ url, type: 'image' })),
+    ...(entry.videos ?? []).map(url => ({ url, type: 'video' })),
+  ]
+
+  // Image-only list for lightbox navigation
+  const lbPhotos = media.filter(m => m.type === 'image').map(m => m.url)
 
   return (
     <main className={styles.entryCol}>
@@ -89,29 +95,39 @@ export default function Entry() {
           </div>
         )}
 
-        {photos.length > 0 && (
+        {media.length > 0 && (
           <div className={styles.photos}>
-            {photos.map((url, i) => (
-              <div key={i} className={styles.imgBlock} onClick={() => setLightbox(i)}>
-                <img src={url} alt="" className={styles.img} />
-              </div>
-            ))}
+            {media.map((item, i) => {
+              if (item.type === 'video') {
+                return (
+                  <div key={i} className={styles.imgBlock}>
+                    <video src={item.url} className={styles.img} controls />
+                  </div>
+                )
+              }
+              const lbIndex = lbPhotos.indexOf(item.url)
+              return (
+                <div key={i} className={styles.imgBlock} onClick={() => setLightbox(lbIndex)}>
+                  <img src={item.url} alt="" className={styles.img} />
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox (images only) */}
       {lightbox !== null && (
         <div className={styles.lightboxOverlay} onClick={() => setLightbox(null)}>
           <button className={`${styles.lbNav} ${styles.lbPrev}`}
             onClick={e => { e.stopPropagation(); setLightbox(i => Math.max(i - 1, 0)) }}
             disabled={lightbox === 0}>‹</button>
-          <img src={photos[lightbox]} alt="" className={styles.lbImg} onClick={e => e.stopPropagation()} />
+          <img src={lbPhotos[lightbox]} alt="" className={styles.lbImg} onClick={e => e.stopPropagation()} />
           <button className={`${styles.lbNav} ${styles.lbNext}`}
-            onClick={e => { e.stopPropagation(); setLightbox(i => Math.min(i + 1, photos.length - 1)) }}
-            disabled={lightbox === photos.length - 1}>›</button>
+            onClick={e => { e.stopPropagation(); setLightbox(i => Math.min(i + 1, lbPhotos.length - 1)) }}
+            disabled={lightbox === lbPhotos.length - 1}>›</button>
           <button className={styles.lbClose} onClick={() => setLightbox(null)}>×</button>
-          <span className={styles.lbCounter}>{lightbox + 1} / {photos.length}</span>
+          <span className={styles.lbCounter}>{lightbox + 1} / {lbPhotos.length}</span>
         </div>
       )}
     </main>

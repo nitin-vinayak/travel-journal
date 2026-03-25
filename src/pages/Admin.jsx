@@ -4,11 +4,14 @@ import { signOut } from 'firebase/auth'
 import { useNavigate, useParams } from 'react-router-dom'
 import { db, auth } from '../firebase/config'
 import { uploadImage } from '../utils/uploadImage'
+import { uploadVideo } from '../utils/uploadVideo'
 import { loadGoogleMaps } from '../utils/loadGoogleMaps'
 import { useMapCoords } from '../context/MapCoordsContext'
 import styles from './Admin.module.css'
 
 const EMPTY_FORM = { title: '', date: '', locationName: '', notes: '' }
+
+// Each mediaItem: { src, type: 'image'|'video', saved: bool, file?: File }
 
 export default function Admin() {
   const { id } = useParams()
@@ -16,9 +19,7 @@ export default function Admin() {
   const { setCoords } = useMapCoords()
 
   const [form, setForm] = useState(EMPTY_FORM)
-  const [savedPhotos, setSavedPhotos] = useState([])
-  const [photos, setPhotos] = useState([])
-  const [previews, setPreviews] = useState([])
+  const [mediaItems, setMediaItems] = useState([])
   const [dragging, setDragging] = useState(false)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(isEdit)
@@ -27,10 +28,9 @@ export default function Admin() {
   const [locationCoords, setLocationCoords] = useState({ lat: null, lng: null })
   const debounceRef = useRef(null)
   const fileInputRef = useRef()
+  const dragIndexRef = useRef(null)
   const navigate = useNavigate()
 
-  // Only reset globe on mount when creating a new entry
-  // Edit mode will set coords once data loads
   useEffect(() => {
     if (!isEdit) setCoords({ lat: null, lng: null })
   }, [])
@@ -47,7 +47,12 @@ export default function Admin() {
           locationName: data.locationName ?? '',
           notes: data.notes ?? '',
         })
-        setSavedPhotos(data.photos ?? [])
+        // Support both new media array and legacy photos/videos arrays
+        const saved = data.media ?? [
+          ...(data.photos ?? []).map(url => ({ src: url, type: 'image', saved: true })),
+          ...(data.videos ?? []).map(url => ({ src: url, type: 'video', saved: true })),
+        ]
+        setMediaItems(saved)
         const coords = { lat: data.lat ?? null, lng: data.lng ?? null }
         setLocationCoords(coords)
         setCoords(coords)
@@ -87,22 +92,54 @@ export default function Admin() {
   useEffect(() => () => clearTimeout(debounceRef.current), [])
 
   function addFiles(files) {
-    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
-    setPhotos(prev => [...prev, ...imageFiles])
-    setPreviews(prev => [...prev, ...imageFiles.map(f => URL.createObjectURL(f))])
+    const newItems = Array.from(files)
+      .filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
+      .map(f => ({
+        src: URL.createObjectURL(f),
+        type: f.type.startsWith('image/') ? 'image' : 'video',
+        saved: false,
+        file: f,
+      }))
+    setMediaItems(prev => [...prev, ...newItems])
   }
 
   function handleFileInput(e) { addFiles(e.target.files); e.target.value = '' }
-  function handleDrop(e) { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }
 
-  function removeNewPhoto(index) {
-    URL.revokeObjectURL(previews[index])
-    setPhotos(prev => prev.filter((_, i) => i !== index))
-    setPreviews(prev => prev.filter((_, i) => i !== index))
+  function handleDrop(e) {
+    e.preventDefault()
+    setDragging(false)
+    // Only handle external file drops (not internal reorder drags)
+    if (dragIndexRef.current !== null) return
+    addFiles(e.dataTransfer.files)
   }
 
-  function removeSavedPhoto(index) {
-    setSavedPhotos(prev => prev.filter((_, i) => i !== index))
+  function removeItem(index) {
+    setMediaItems(prev => {
+      const item = prev[index]
+      if (!item.saved) URL.revokeObjectURL(item.src)
+      return prev.filter((_, i) => i !== index)
+    })
+  }
+
+  // Drag-to-reorder handlers
+  function onItemDragStart(e, index) {
+    dragIndexRef.current = index
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  function onItemDragEnter(index) {
+    if (dragIndexRef.current === null || dragIndexRef.current === index) return
+    setMediaItems(prev => {
+      const next = [...prev]
+      const [item] = next.splice(dragIndexRef.current, 1)
+      next.splice(index, 0, item)
+      dragIndexRef.current = index
+      return next
+    })
+  }
+
+  function onItemDragEnd() {
+    dragIndexRef.current = null
   }
 
   async function handleSubmit(e) {
@@ -110,8 +147,15 @@ export default function Admin() {
     setError('')
     setSaving(true)
     try {
-      const newPhotoUrls = await Promise.all(photos.map(uploadImage))
-      const allPhotos = [...savedPhotos, ...newPhotoUrls]
+      const media = await Promise.all(
+        mediaItems.map(async item => {
+          if (item.saved) return { url: item.src, type: item.type }
+          const url = item.type === 'image'
+            ? await uploadImage(item.file)
+            : await uploadVideo(item.file)
+          return { url, type: item.type }
+        })
+      )
       const entryData = {
         title: form.title,
         date: Timestamp.fromDate(new Date(form.date)),
@@ -119,14 +163,14 @@ export default function Admin() {
         lat: locationCoords.lat,
         lng: locationCoords.lng,
         notes: form.notes,
-        photos: allPhotos,
+        media,
       }
       if (isEdit) {
         await updateDoc(doc(db, 'entries', id), entryData)
         navigate(`/entry/${id}`)
       } else {
         await addDoc(collection(db, 'entries'), { ...entryData, createdAt: Timestamp.now() })
-        previews.forEach(url => URL.revokeObjectURL(url))
+        mediaItems.filter(i => !i.saved).forEach(i => URL.revokeObjectURL(i.src))
         navigate('/journal')
       }
     } catch (err) {
@@ -141,11 +185,6 @@ export default function Admin() {
     await signOut(auth)
     navigate('/journal')
   }
-
-  const allPreviews = [
-    ...savedPhotos.map(url => ({ src: url, saved: true })),
-    ...previews.map((src, i) => ({ src, saved: false, index: i })),
-  ]
 
   if (loading) return <div className={styles.loadingPage}>Loading…</div>
 
@@ -198,10 +237,10 @@ export default function Admin() {
           <textarea name="notes" value={form.notes} onChange={handleChange} className={styles.textarea} placeholder="Write about your day…" rows={6} />
         </div>
 
-        {/* Photos */}
+        {/* Media */}
         <div className={styles.field}>
-          <label className={styles.label}>Photos</label>
-          <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileInput} className={styles.hiddenInput} />
+          <label className={styles.label}>Media</label>
+          <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={handleFileInput} className={styles.hiddenInput} />
           <div
             className={`${styles.dropZone} ${dragging ? styles.dragging : ''}`}
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
@@ -209,17 +248,29 @@ export default function Admin() {
             onDrop={handleDrop}
             onClick={() => fileInputRef.current.click()}
           >
-            {allPreviews.length === 0 ? (
-              <span className={styles.dropText}>Drop photos here or click to add</span>
+            {mediaItems.length === 0 ? (
+              <span className={styles.dropText}>Drop photos or videos here or click to add</span>
             ) : (
               <div className={styles.previewList}>
-                {allPreviews.map((item, i) => (
-                  <div key={i} className={styles.previewItem} onClick={e => e.stopPropagation()}>
-                    <img src={item.src} alt="" className={styles.previewImg} />
+                {mediaItems.map((item, i) => (
+                  <div
+                    key={i}
+                    className={styles.previewItem}
+                    draggable
+                    onDragStart={e => { e.stopPropagation(); onItemDragStart(e, i) }}
+                    onDragEnter={e => { e.stopPropagation(); onItemDragEnter(i) }}
+                    onDragOver={e => e.preventDefault()}
+                    onDragEnd={onItemDragEnd}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    {item.type === 'image'
+                      ? <img src={item.src} alt="" className={styles.previewImg} />
+                      : <video src={item.src} className={styles.previewImg} muted />
+                    }
                     <button
                       type="button"
                       className={styles.removeBtn}
-                      onClick={e => { e.stopPropagation(); item.saved ? removeSavedPhoto(savedPhotos.indexOf(item.src)) : removeNewPhoto(item.index) }}
+                      onClick={e => { e.stopPropagation(); removeItem(i) }}
                     >×</button>
                   </div>
                 ))}

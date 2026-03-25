@@ -179,7 +179,10 @@
 .previewItem {
   position: relative;
   flex-shrink: 0;
+  cursor: grab;
 }
+
+.previewItem:active { cursor: grabbing; }
 
 .previewImg {
   max-width: 120px;
