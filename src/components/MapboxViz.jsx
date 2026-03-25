@@ -52,7 +52,10 @@ export default function MapboxViz({ lat, lng }) {
     mapRef.current = map
     markerRef.current = new mapboxgl.Marker({ color: '#000' })
 
-    return () => map.remove()
+    const ro = new ResizeObserver(() => map.resize())
+    ro.observe(containerRef.current)
+
+    return () => { map.remove(); ro.disconnect() }
   }, [])
 
   useEffect(() => {

@@ -29,9 +29,10 @@ export default function Admin() {
   const fileInputRef = useRef()
   const navigate = useNavigate()
 
-  // Reset globe on mount, restore if editing an entry with coords
+  // Only reset globe on mount when creating a new entry
+  // Edit mode will set coords once data loads
   useEffect(() => {
-    setCoords({ lat: null, lng: null })
+    if (!isEdit) setCoords({ lat: null, lng: null })
   }, [])
 
   useEffect(() => {
@@ -206,19 +207,19 @@ export default function Admin() {
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
-            onClick={() => allPreviews.length === 0 && fileInputRef.current.click()}
+            onClick={() => fileInputRef.current.click()}
           >
             {allPreviews.length === 0 ? (
               <span className={styles.dropText}>Drop photos here or click to add</span>
             ) : (
               <div className={styles.previewList}>
                 {allPreviews.map((item, i) => (
-                  <div key={i} className={styles.previewItem}>
+                  <div key={i} className={styles.previewItem} onClick={e => e.stopPropagation()}>
                     <img src={item.src} alt="" className={styles.previewImg} />
                     <button
                       type="button"
                       className={styles.removeBtn}
-                      onClick={() => item.saved ? removeSavedPhoto(savedPhotos.indexOf(item.src)) : removeNewPhoto(item.index)}
+                      onClick={e => { e.stopPropagation(); item.saved ? removeSavedPhoto(savedPhotos.indexOf(item.src)) : removeNewPhoto(item.index) }}
                     >×</button>
                   </div>
                 ))}

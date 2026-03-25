@@ -23,11 +23,11 @@ function App() {
             <Route path="/admin/edit/:id" element={
               <ProtectedRoute><Admin /></ProtectedRoute>
             } />
+            <Route path="/entry/:id" element={
+              <ProtectedRoute><Entry /></ProtectedRoute>
+            } />
           </Route>
 
-          <Route path="/entry/:id" element={
-            <ProtectedRoute><Entry /></ProtectedRoute>
-          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
