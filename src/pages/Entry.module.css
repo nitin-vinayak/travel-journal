@@ -147,7 +147,10 @@
   width: 100%;
   height: auto;
   display: block;
+  opacity: 1;
 }
+
+.imgBlock:hover .img { opacity: 1; }
 
 
 /* Lightbox */
