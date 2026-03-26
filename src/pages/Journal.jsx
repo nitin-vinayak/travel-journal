@@ -132,36 +132,35 @@ export default function Journal() {
       <div className={styles.loggedIn}>
         <div className={styles.headerActions}>
           {isOwner ? (
-            !editMode ? (
-              <>
-                <div className={styles.headerLeft}>
-                  <button onClick={() => navigate('/admin')} className={styles.navBtn}>New Entry</button>
-                  <input
-                    ref={searchRef}
-                    className={styles.searchInput}
-                    placeholder="Search"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                  />
-                </div>
-                <div className={styles.headerRight}>
-                  <button onClick={toggleEditMode} className={styles.editModeBtn}>Edit</button>
-                  <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className={styles.headerLeft} />
-                <div className={styles.headerRight}>
-                  {selected.size > 0 && (
-                    <button onClick={deleteSelected} className={styles.deleteBtn} disabled={deleting}>
-                      {deleting ? 'Deleting…' : `Delete ${selected.size}`}
-                    </button>
-                  )}
-                  <button onClick={toggleEditMode} className={styles.cancelBtn}>Cancel</button>
-                </div>
-              </>
-            )
+            <>
+              <div className={styles.headerLeft}>
+                {!editMode && <button onClick={() => navigate('/admin')} className={styles.navBtn}>New Entry</button>}
+                <input
+                  ref={searchRef}
+                  className={styles.searchInput}
+                  placeholder="Search"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+              <div className={styles.headerRight}>
+                {editMode ? (
+                  <>
+                    {selected.size > 0 && (
+                      <button onClick={deleteSelected} className={styles.deleteBtn} disabled={deleting}>
+                        {deleting ? 'Deleting…' : `Delete ${selected.size}`}
+                      </button>
+                    )}
+                    <button onClick={toggleEditMode} className={styles.cancelBtn}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={toggleEditMode} className={styles.editModeBtn}>Edit</button>
+                    <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
+                  </>
+                )}
+              </div>
+            </>
           ) : (
             <>
               <div className={styles.headerLeft}>
