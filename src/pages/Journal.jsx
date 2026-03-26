@@ -187,11 +187,9 @@ export default function Journal() {
         <div className={styles.scrollable}>
           {search.startsWith('@') ? (
             <div className={styles.feed}>
-              {!userSearching && userResults.length > 0 && (
-                <span className={styles.resultCount}>
-                  {userResults.length} {userResults.length === 1 ? 'user' : 'users'}
-                </span>
-              )}
+              <span className={styles.resultCount} style={{ visibility: !userSearching && userResults.length > 0 ? 'visible' : 'hidden' }}>
+                {userResults.length} {userResults.length === 1 ? 'user' : 'users'}
+              </span>
               {userResults.map(u => (
                 <div key={u.uid} className={styles.userCard} onClick={() => navigate(`/${u.username}`)}>
                   <span className={styles.userCardName}>@{u.username}</span>
@@ -211,11 +209,9 @@ export default function Journal() {
             })
             return (
             <div className={styles.feed}>
-              {search.trim() && (
-                <span className={styles.resultCount}>
-                  {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'}
-                </span>
-              )}
+              <span className={styles.resultCount} style={{ visibility: search.trim() ? 'visible' : 'hidden' }}>
+                {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'}
+              </span>
               {filtered.map(entry => (
                 <article
                   key={entry.id}
