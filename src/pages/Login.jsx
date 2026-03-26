@@ -25,7 +25,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password)
     } catch (err) {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
         try {
           await createUserWithEmailAndPassword(auth, email, password)
         } catch (createErr) {
