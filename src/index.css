@@ -74,6 +74,10 @@
   padding: 0;
 }
 
+html {
+  font-size: clamp(12px, calc(100vw / 120), 16px);
+}
+
 :root {
   font-family: 'Inter', sans-serif;
   background-color: #ffffff;
