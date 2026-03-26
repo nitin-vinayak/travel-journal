@@ -47,12 +47,6 @@ export default function SetUsername() {
 
   return (
     <main className={styles.feedCol}>
-      <div className={styles.headerActions}>
-        <div className={styles.headerLeft}>
-          <button onClick={handleBack} className={styles.navBtn}>Back</button>
-        </div>
-        <div className={styles.headerRight} />
-      </div>
       <div className={styles.loginWrap}>
         <h1 className={styles.loginTitle}>Pick a username</h1>
         <p className={styles.loginSub}>This will be your public journal URL.</p>
@@ -72,6 +66,7 @@ export default function SetUsername() {
           <button type="submit" className={styles.loginBtn} disabled={!valid || saving}>
             {saving ? 'Saving…' : 'Continue'}
           </button>
+          <button type="button" onClick={handleBack} className={styles.loginBackBtn}>Back</button>
         </form>
       </div>
     </main>
