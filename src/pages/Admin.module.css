@@ -130,11 +130,6 @@
 .suggestion:last-child { border-bottom: none; }
 .suggestion:hover { background: #f5f5f5; }
 
-.locationConfirmed {
-  font-size: 0.72rem;
-  color: #999;
-}
-
 /* Photos */
 .hiddenInput { display: none; }
 

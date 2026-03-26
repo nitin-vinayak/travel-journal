@@ -1,44 +1,41 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import MapLayout from './layouts/MapLayout'
 import Journal from './pages/Journal'
 import Admin from './pages/Admin'
 import Entry from './pages/Entry'
-import PublicJournal from './pages/PublicJournal'
-import PublicEntry from './pages/PublicEntry'
+import Login from './pages/Login'
 import SetUsername from './pages/SetUsername'
+
+function RootRedirect() {
+  const { user, username } = useAuth()
+  if (user === undefined || (user && username === undefined)) return null
+  if (user && username) return <Navigate to={`/${username}`} replace />
+  if (user && username === null) return <Navigate to="/setup" replace />
+  return <Navigate to="/login" replace />
+}
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/journal" replace />} />
-          <Route path="/login" element={<Navigate to="/journal" replace />} />
+          <Route path="/" element={<RootRedirect />} />
 
-          {/* Routes that share the persistent globe layout */}
           <Route element={<MapLayout />}>
-            {/* Username setup */}
+            <Route path="/login" element={<Login />} />
             <Route path="/setup" element={
               <ProtectedRoute><SetUsername /></ProtectedRoute>
             } />
-
-            {/* Public read-only routes */}
-            <Route path="/u/:username" element={<PublicJournal />} />
-            <Route path="/u/:username/entry/:id" element={<PublicEntry />} />
-
-            {/* Private admin routes */}
-            <Route path="/journal" element={<Journal />} />
             <Route path="/admin" element={
               <ProtectedRoute><Admin /></ProtectedRoute>
             } />
             <Route path="/admin/edit/:id" element={
               <ProtectedRoute><Admin /></ProtectedRoute>
             } />
-            <Route path="/admin/entry/:id" element={
-              <ProtectedRoute><Entry /></ProtectedRoute>
-            } />
+            <Route path="/:username" element={<Journal />} />
+            <Route path="/:username/entry/:id" element={<Entry />} />
           </Route>
 
         </Routes>

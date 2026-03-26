@@ -19,10 +19,7 @@ export default function Admin() {
   const isEdit = Boolean(id)
   const { setCoords } = useMapCoords()
   const { username } = useAuth()
-
-  useEffect(() => {
-    if (username === null) navigate('/setup')
-  }, [username])
+  const navigate = useNavigate()
 
   const [form, setForm] = useState(EMPTY_FORM)
   const [mediaItems, setMediaItems] = useState([])
@@ -35,7 +32,10 @@ export default function Admin() {
   const debounceRef = useRef(null)
   const fileInputRef = useRef()
   const dragIndexRef = useRef(null)
-  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (username === null) navigate('/setup')
+  }, [username])
 
   useEffect(() => {
     if (!isEdit) setCoords({ lat: null, lng: null })
@@ -175,11 +175,11 @@ export default function Admin() {
       }
       if (isEdit) {
         await updateDoc(doc(db, 'entries', id), entryData)
-        navigate(`/entry/${id}`)
+        navigate(`/${username}/entry/${id}`)
       } else {
         await addDoc(collection(db, 'entries'), { ...entryData, createdAt: Timestamp.now(), uid: auth.currentUser.uid })
         mediaItems.filter(i => !i.saved).forEach(i => URL.revokeObjectURL(i.src))
-        navigate('/journal')
+        navigate(`/${username}`)
       }
     } catch (err) {
       console.error(err)
@@ -191,7 +191,7 @@ export default function Admin() {
 
   async function handleLogout() {
     await signOut(auth)
-    navigate('/journal')
+    navigate('/login')
   }
 
   if (loading) return <div className={styles.loadingPage}>Loading…</div>
@@ -199,7 +199,7 @@ export default function Admin() {
   return (
     <main className={styles.formCol}>
       <div className={styles.headerActions}>
-        <button onClick={() => navigate('/journal')} className={styles.navBtn}>Journal</button>
+        <button onClick={() => navigate(`/${username}`)} className={styles.navBtn}>Journal</button>
         <button onClick={handleLogout} className={styles.logoutBtn}>Sign out</button>
       </div>
 
@@ -294,7 +294,7 @@ export default function Admin() {
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Save Entry'}
           </button>
           {isEdit && (
-            <button type="button" className={styles.cancelBtn} onClick={() => navigate(`/entry/${id}`)}>Cancel</button>
+            <button type="button" className={styles.cancelBtn} onClick={() => navigate(`/${username}/entry/${id}`)}>Cancel</button>
           )}
         </div>
       </form>

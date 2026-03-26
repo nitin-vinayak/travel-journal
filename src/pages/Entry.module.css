@@ -52,12 +52,6 @@
 .editBtn:hover,
 .cancelBtn:hover { color: #000; }
 
-.navActions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
 .deleteBtn {
   padding: 0;
   background: transparent;

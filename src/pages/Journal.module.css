@@ -26,6 +26,7 @@
   align-items: center;
   background: #fff;
   padding: 60px 96px;
+  animation: fadeIn 0.6s ease both;
 }
 
 .navBtn,
@@ -75,61 +76,11 @@
   opacity: 0.5;
 }
 
-.checkbox {
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid #000;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.checkInner {
-  width: 10px;
-  height: 10px;
-  background: transparent;
-  transition: background 0.15s;
-}
-
-.checked .checkInner,
-.checkInner.checked {
-  background: #000;
-}
-
-.checkInner.checked { background: #000; }
-
-
 .loading {
   padding: 48px;
   font-size: 0.85rem;
   color: #999;
 }
-
-.empty {
-  padding: 48px;
-}
-
-.emptyIcon { display: none; }
-
-.emptyText {
-  font-size: 0.9rem;
-  color: #999;
-  margin-bottom: 20px;
-}
-
-.emptyBtn {
-  padding: 7px 14px;
-  background: #000;
-  color: #fff;
-  border: none;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.emptyBtn:hover { opacity: 0.7; }
 
 /* Feed */
 .feed {
@@ -164,9 +115,6 @@
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.entry:hover .node {
-  transform: scale(1.3);
-}
 
 .editMode .node {
   background: #fff;
@@ -230,46 +178,11 @@
   transition: transform 0.25s ease;
 }
 
-.entry:hover .title {
+.title:hover {
   transform: scale(1.06);
 }
 
 .title:hover { opacity: 1; }
-
-.excerpt {
-  font-size: 0.88rem;
-  line-height: 1.7;
-  color: #666;
-  margin-bottom: 24px;
-  max-width: 600px;
-}
-
-/* Photo grids */
-.photoGrid {
-  display: grid;
-  gap: 4px;
-  max-width: 680px;
-  align-items: start;
-}
-
-.grid1 { grid-template-columns: 1fr; }
-.grid2 { grid-template-columns: 1fr 1fr; }
-.grid3 { grid-template-columns: 1fr 1fr; }
-.grid4 { grid-template-columns: 1fr 1fr; }
-
-.photoItem {
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.photo {
-  width: 100%;
-  height: auto;
-  display: block;
-  transition: opacity 0.2s;
-}
-
-.photoItem:hover .photo { opacity: 0.85; }
 
 /* Login form (renders in feedCol) */
 @keyframes fadeIn {

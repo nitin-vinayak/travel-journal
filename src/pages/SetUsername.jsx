@@ -31,7 +31,7 @@ export default function SetUsername() {
         createdAt: Timestamp.now(),
       })
       setUsername(value)
-      navigate('/journal')
+      navigate(`/${value}`)
     } catch {
       setError('Something went wrong. Try again.')
     } finally {

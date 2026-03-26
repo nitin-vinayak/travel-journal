@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react'
 import { doc, getDoc, deleteDoc } from 'firebase/firestore'
 import { useParams, useNavigate } from 'react-router-dom'
 import { db } from '../firebase/config'
+import { useAuth } from '../context/AuthContext'
 import { useMapCoords } from '../context/MapCoordsContext'
 import styles from './Entry.module.css'
 
 export default function Entry() {
-  const { id } = useParams()
+  const { username, id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { setCoords } = useMapCoords()
   const [entry, setEntry] = useState(null)
   const [loading, setLoading] = useState(true)
   const [lightbox, setLightbox] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const isOwner = user && entry && user.uid === entry.uid
 
   useEffect(() => {
     async function fetchEntry() {
@@ -40,7 +44,7 @@ export default function Entry() {
 
   async function handleDelete() {
     await deleteDoc(doc(db, 'entries', id))
-    navigate('/journal')
+    navigate(`/${username}`)
   }
 
   function formatDate(timestamp) {
@@ -52,33 +56,33 @@ export default function Entry() {
   if (loading) return <div className={styles.loading}>Loading…</div>
   if (!entry)  return <div className={styles.loading}>Entry not found.</div>
 
-  // Support new media array and legacy photos/videos arrays
   const media = entry.media ?? [
     ...(entry.photos ?? []).map(url => ({ url, type: 'image' })),
     ...(entry.videos ?? []).map(url => ({ url, type: 'video' })),
   ]
 
-  // Image-only list for lightbox navigation
   const lbPhotos = media.filter(m => m.type === 'image').map(m => m.url)
 
   return (
     <main className={styles.entryCol}>
 
-      {/* Fixed action buttons */}
       <div className={styles.fixedActions}>
-        <button onClick={() => navigate('/journal')} className={styles.backBtn}>Back</button>
-        <button onClick={() => navigate(`/admin/edit/${id}`)} className={styles.editBtn}>Edit</button>
-        {confirmDelete ? (
+        <button onClick={() => navigate(`/${username}`)} className={styles.backBtn}>Back</button>
+        {isOwner && (
           <>
-            <button onClick={handleDelete} className={styles.deleteConfirmBtn}>Delete</button>
-            <button onClick={() => setConfirmDelete(false)} className={styles.cancelBtn}>Cancel</button>
+            <button onClick={() => navigate(`/admin/edit/${id}`)} className={styles.editBtn}>Edit</button>
+            {confirmDelete ? (
+              <>
+                <button onClick={handleDelete} className={styles.deleteConfirmBtn}>Delete</button>
+                <button onClick={() => setConfirmDelete(false)} className={styles.cancelBtn}>Cancel</button>
+              </>
+            ) : (
+              <button onClick={() => setConfirmDelete(true)} className={styles.deleteBtn}>Delete</button>
+            )}
           </>
-        ) : (
-          <button onClick={() => setConfirmDelete(true)} className={styles.deleteBtn}>Delete</button>
         )}
       </div>
 
-      {/* Scrollable content */}
       <div className={styles.scrollable}>
         <div className={styles.meta}>
           <span className={styles.date}>{formatDate(entry.date)}</span>
@@ -116,7 +120,6 @@ export default function Entry() {
         )}
       </div>
 
-      {/* Lightbox (images only) */}
       {lightbox !== null && (
         <div className={styles.lightboxOverlay} onClick={() => setLightbox(null)}>
           <button className={`${styles.lbNav} ${styles.lbPrev}`}
