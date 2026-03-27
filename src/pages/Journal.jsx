@@ -118,7 +118,11 @@ export default function Journal() {
     setDeleting(true)
     await Promise.all([...selected].map(id => deleteDoc(doc(db, 'entries', id))))
     setEntries(prev => prev.filter(e => !selected.has(e.id)))
-    setDrafts(prev => prev.filter(e => !selected.has(e.id)))
+    setDrafts(prev => {
+      const remaining = prev.filter(e => !selected.has(e.id))
+      if (remaining.length === 0) setShowDrafts(false)
+      return remaining
+    })
     setSelected(new Set())
     setEditMode(false)
     setDeleting(false)
