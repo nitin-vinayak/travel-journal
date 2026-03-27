@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { collection, getDocs, orderBy, query, where, deleteDoc, doc } from 'firebase/firestore'
+import { collection, getDocs, orderBy, query, where, deleteDoc, doc, writeBatch, updateDoc } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { db, auth } from '../firebase/config'
@@ -17,12 +17,20 @@ export default function Journal() {
   const [showDrafts, setShowDrafts] = useState(!!location.state?.drafts)
   const [showCollections, setShowCollections] = useState(false)
   const [activeCollection, setActiveCollection] = useState(null)
+  const [collectionView, setCollectionView] = useState(location.state?.collection ?? null)
+  const [collectionEditMode, setCollectionEditMode] = useState(false)
+  const [collectionNameInput, setCollectionNameInput] = useState(location.state?.collection ?? '')
+  const [collectionNameEditing, setCollectionNameEditing] = useState(false)
+  const [collectionSelected, setCollectionSelected] = useState(new Set())
+  const [savingCollection, setSavingCollection] = useState(false)
+  const [confirmCollectionDelete, setConfirmCollectionDelete] = useState(false)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [profileUid, setProfileUid] = useState(null)
   const [editMode, setEditMode] = useState(false)
   const [selected, setSelected] = useState(new Set())
   const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [search, setSearch] = useState('')
   const [userResults, setUserResults] = useState([])
   const [userSearching, setUserSearching] = useState(false)
@@ -43,6 +51,11 @@ export default function Journal() {
     setShowDrafts(!!location.state?.drafts)
     setShowCollections(false)
     setActiveCollection(null)
+    setCollectionView(location.state?.collection ?? null)
+    setCollectionNameInput(location.state?.collection ?? '')
+    setCollectionEditMode(false)
+    setCollectionNameEditing(false)
+    setCollectionSelected(new Set())
     setSearch('')
     async function fetchEntries() {
       const userSnap = await getDocs(query(collection(db, 'users'), where('username', '==', profileUsername)))
@@ -58,6 +71,16 @@ export default function Journal() {
     }
     fetchEntries()
   }, [profileUsername])
+
+  useEffect(() => {
+    if (!collectionView || loading) return
+    const hasEntries = entries.some(e => e.collection === collectionView)
+    if (!hasEntries) {
+      setCollectionView(null)
+      setCollectionNameInput('')
+      setShowCollections(true)
+    }
+  }, [entries, collectionView, loading])
 
   useEffect(() => {
     function onKey(e) {
@@ -101,6 +124,7 @@ export default function Journal() {
   }
 
   function toggleSelect(id) {
+    setConfirmDelete(false)
     setSelected(prev => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
@@ -111,6 +135,7 @@ export default function Journal() {
   function toggleEditMode() {
     setEditMode(v => !v)
     setSelected(new Set())
+    setConfirmDelete(false)
   }
 
   async function deleteSelected() {
@@ -126,6 +151,65 @@ export default function Journal() {
     setSelected(new Set())
     setEditMode(false)
     setDeleting(false)
+  }
+
+  function openCollectionView(name) {
+    setCollectionView(name)
+    setCollectionNameInput(name)
+    setShowCollections(false)
+    setCollectionEditMode(false)
+    setCollectionNameEditing(false)
+    setCollectionSelected(new Set())
+  }
+
+  function closeCollectionView() {
+    setCollectionView(null)
+    setCollectionEditMode(false)
+    setCollectionNameEditing(false)
+    setCollectionSelected(new Set())
+    setShowCollections(true)
+  }
+
+  function toggleCollectionSelect(id) {
+    setConfirmCollectionDelete(false)
+    setCollectionSelected(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  async function saveCollectionName() {
+    const newName = collectionNameInput.trim()
+    setCollectionNameEditing(false)
+    if (!newName || newName === collectionView) {
+      setCollectionNameInput(collectionView)
+      return
+    }
+    const batch = writeBatch(db)
+    entries
+      .filter(e => e.collection === collectionView)
+      .forEach(e => batch.update(doc(db, 'entries', e.id), { collection: newName }))
+    await batch.commit()
+    setEntries(prev => prev.map(e => e.collection === collectionView ? { ...e, collection: newName } : e))
+    setCollectionView(newName)
+    setCollectionNameInput(newName)
+  }
+
+  async function removeFromCollection() {
+    setSavingCollection(true)
+    const batch = writeBatch(db)
+    collectionSelected.forEach(id => batch.update(doc(db, 'entries', id), { collection: null }))
+    await batch.commit()
+    const remaining = entries.filter(e => e.collection === collectionView && !collectionSelected.has(e.id))
+    setEntries(prev => prev.map(e => collectionSelected.has(e.id) ? { ...e, collection: null } : e))
+    setCollectionEditMode(false)
+    setCollectionSelected(new Set())
+    setSavingCollection(false)
+    if (remaining.length === 0) {
+      setCollectionView(null)
+      setShowCollections(true)
+    }
   }
 
   async function handleLogout() {
@@ -150,11 +234,13 @@ export default function Journal() {
           {isOwner ? (
             <>
               <div className={styles.headerLeft}>
-                {!editMode && (showDrafts || showCollections
+                {collectionView ? (
+                  <button onClick={closeCollectionView} className={styles.navBtn}>Back</button>
+                ) : !editMode && (showDrafts || showCollections
                   ? <button onClick={() => { setShowDrafts(false); setShowCollections(false); setSearch('') }} className={styles.navBtn}>Back</button>
                   : <button onClick={() => navigate('/admin')} className={styles.navBtn}>New Entry</button>
                 )}
-                {!editMode && drafts.length > 0 && !showDrafts && !showCollections && (
+                {!editMode && !collectionView && drafts.length > 0 && !showDrafts && !showCollections && (
                   <button onClick={() => { setShowDrafts(true); setSearch('') }} className={styles.navBtn}>
                     Drafts ({drafts.length})
                   </button>
@@ -168,21 +254,59 @@ export default function Journal() {
                 />
               </div>
               <div className={styles.headerRight}>
-                {editMode ? (
+                {collectionView ? (
+                  collectionEditMode ? (
+                    <>
+                      {collectionSelected.size > 0 && (
+                        confirmCollectionDelete ? (
+                          <>
+                            <button onClick={removeFromCollection} className={styles.deleteBtn} disabled={savingCollection}>
+                              {savingCollection ? 'Removing…' : 'Confirm Remove'}
+                            </button>
+                            <button onClick={() => setConfirmCollectionDelete(false)} className={styles.cancelBtn}>Cancel</button>
+                          </>
+                        ) : (
+                          <button onClick={() => setConfirmCollectionDelete(true)} className={styles.deleteBtn}>
+                            {`Remove ${collectionSelected.size}`}
+                          </button>
+                        )
+                      )}
+                      {!confirmCollectionDelete && (
+                        <button onClick={() => { setCollectionEditMode(false); setCollectionSelected(new Set()); setConfirmCollectionDelete(false) }} className={styles.cancelBtn}>Cancel</button>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => setCollectionEditMode(true)} className={styles.editModeBtn}>Edit</button>
+                      <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
+                    </>
+                  )
+                ) : editMode ? (
                   <>
                     {selected.size > 0 && (
-                      <button onClick={deleteSelected} className={styles.deleteBtn} disabled={deleting}>
-                        {deleting ? 'Deleting…' : `Delete ${selected.size}`}
-                      </button>
+                      confirmDelete ? (
+                        <>
+                          <button onClick={deleteSelected} className={styles.deleteBtn} disabled={deleting}>
+                            {deleting ? 'Deleting…' : 'Confirm Delete'}
+                          </button>
+                          <button onClick={() => setConfirmDelete(false)} className={styles.cancelBtn}>Cancel</button>
+                        </>
+                      ) : (
+                        <button onClick={() => setConfirmDelete(true)} className={styles.deleteBtn}>
+                          {`Delete ${selected.size}`}
+                        </button>
+                      )
                     )}
-                    <button onClick={toggleEditMode} className={styles.cancelBtn}>Cancel</button>
+                    {!confirmDelete && (
+                      <button onClick={toggleEditMode} className={styles.cancelBtn}>Cancel</button>
+                    )}
                   </>
                 ) : (
                   <>
                     {!showDrafts && !showCollections && (
-                      <button onClick={() => { setShowCollections(true); setActiveCollection(null); setSearch('') }} className={styles.navBtn}>Collections</button>
+                      <button onClick={() => { setShowCollections(true); setSearch('') }} className={styles.navBtn}>Collections</button>
                     )}
-                    <button onClick={toggleEditMode} className={styles.editModeBtn}>Edit</button>
+                    {!showCollections && <button onClick={toggleEditMode} className={styles.editModeBtn}>Edit</button>}
                     <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
                   </>
                 )}
@@ -211,7 +335,68 @@ export default function Journal() {
         </div>
 
         <div className={styles.scrollable}>
-          {showDrafts && !search.startsWith('@') ? (
+          {collectionView ? (
+            <div className={styles.feed}>
+              {collectionNameEditing
+                ? <input
+                    className={styles.collectionTitle}
+                    value={collectionNameInput}
+                    onChange={e => setCollectionNameInput(e.target.value)}
+                    onBlur={saveCollectionName}
+                    onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') { setCollectionNameInput(collectionView); setCollectionNameEditing(false) } }}
+                    autoFocus
+                  />
+                : <h2 className={`${styles.collectionTitle} ${styles.collectionTitleClickable}`} onClick={() => !collectionEditMode && setCollectionNameEditing(true)}>{collectionView}</h2>
+              }
+
+              {entries.filter(e => {
+                if (e.collection !== collectionView) return false
+                if (!search.trim()) return true
+                const q = search.toLowerCase()
+                return e.title.toLowerCase().includes(q) ||
+                  (e.locationName ?? '').toLowerCase().includes(q) ||
+                  formatDate(e.date).toLowerCase().includes(q)
+              }).map(entry => (
+                <article
+                  key={entry.id}
+                  className={`${styles.entry} ${collectionEditMode ? styles.editMode : ''} ${collectionEditMode && collectionSelected.has(entry.id) ? styles.selected : ''}`}
+                  onClick={collectionEditMode ? () => toggleCollectionSelect(entry.id) : undefined}
+                >
+                  <div className={styles.timeline}><div className={styles.node} /></div>
+                  <div className={styles.entryContent}>
+                    {entry.locationName && <span className={styles.location}>{entry.locationName}</span>}
+                    <h2
+                      className={styles.title}
+                      onClick={!collectionEditMode ? () => navigate(`/${profileUsername}/entry/${entry.id}`, { state: { collection: collectionView } }) : undefined}
+                      onMouseEnter={() => {
+                        clearTimeout(hoverTimer.current)
+                        hoverTimer.current = setTimeout(() => setCoords({ lat: entry.lat ?? null, lng: entry.lng ?? null }), 400)
+                      }}
+                      onMouseLeave={() => {
+                        clearTimeout(hoverTimer.current)
+                        hoverTimer.current = setTimeout(() => setCoords({ lat: null, lng: null }), 150)
+                      }}
+                    >{entry.title}</h2>
+                    <span className={styles.date}>{formatDate(entry.date)}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : search.startsWith('@') && !showCollections && !collectionView ? (
+            <div className={styles.feed}>
+              <span className={styles.resultCount} style={{ visibility: !userSearching && userResults.length > 0 ? 'visible' : 'hidden' }}>
+                {userResults.length} {userResults.length === 1 ? 'user' : 'users'}
+              </span>
+              {userResults.map(u => (
+                <div key={u.uid} className={styles.userCard} onClick={() => navigate(`/${u.username}`)}>
+                  <span className={styles.userCardName}>@{u.username}</span>
+                </div>
+              ))}
+              {!userSearching && search.length > 1 && userResults.length === 0 && (
+                <span className={styles.noResults}>No users found</span>
+              )}
+            </div>
+          ) : showDrafts && !search.startsWith('@') ? (
             <div className={styles.feed}>
               {drafts.length === 0 ? (
                 <span className={styles.noResults}>No drafts</span>
@@ -257,20 +442,6 @@ export default function Journal() {
                 </article>
               ))}
             </div>
-          ) : search.startsWith('@') ? (
-            <div className={styles.feed}>
-              <span className={styles.resultCount} style={{ visibility: !userSearching && userResults.length > 0 ? 'visible' : 'hidden' }}>
-                {userResults.length} {userResults.length === 1 ? 'user' : 'users'}
-              </span>
-              {userResults.map(u => (
-                <div key={u.uid} className={styles.userCard} onClick={() => navigate(`/${u.username}`)}>
-                  <span className={styles.userCardName}>@{u.username}</span>
-                </div>
-              ))}
-              {!userSearching && search.length > 1 && userResults.length === 0 && (
-                <span className={styles.noResults}>No users found</span>
-              )}
-            </div>
           ) : showCollections ? (
             <div className={styles.feed}>
               {(() => {
@@ -280,7 +451,7 @@ export default function Journal() {
                 return cols.length === 0
                   ? <span className={styles.noResults}>No collections yet</span>
                   : cols.map(([name, count]) => (
-                    <div key={name} className={styles.userCard} onClick={() => { setActiveCollection(name); setShowCollections(false); setSearch('') }}>
+                    <div key={name} className={styles.userCard} onClick={() => openCollectionView(name)}>
                       <span className={styles.userCardName}>{name}</span>
                       <span className={styles.collectionCount}>{count} {count === 1 ? 'entry' : 'entries'}</span>
                     </div>

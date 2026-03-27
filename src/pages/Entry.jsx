@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { doc, getDoc, deleteDoc } from 'firebase/firestore'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import { useMapCoords } from '../context/MapCoordsContext'
@@ -10,6 +10,7 @@ import styles from './Entry.module.css'
 export default function Entry() {
   const { username, id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
   const { setCoords } = useMapCoords()
   const [entry, setEntry] = useState(null)
@@ -43,9 +44,11 @@ export default function Entry() {
     return () => window.removeEventListener('keydown', onKey)
   }, [lightbox, entry])
 
+  const backState = location.state?.collection ? { state: { collection: location.state.collection } } : undefined
+
   async function handleDelete() {
     await deleteDoc(doc(db, 'entries', id))
-    navigate(`/${username}`)
+    navigate(`/${username}`, backState)
   }
 
   function formatDate(timestamp) {
@@ -69,19 +72,21 @@ export default function Entry() {
 
       <div className={styles.fixedActions}>
         <div className={styles.headerLeft}>
-          <button onClick={() => navigate(`/${username}`)} className={styles.backBtn}>Back</button>
+          <button onClick={() => navigate(`/${username}`, backState)} className={styles.backBtn}>Back</button>
         </div>
         <div className={styles.headerRight}>
           {isOwner && (
             <>
-              <button onClick={() => navigate(`/admin/edit/${id}`)} className={styles.editBtn}>Edit</button>
               {confirmDelete ? (
                 <>
-                  <button onClick={handleDelete} className={styles.deleteConfirmBtn}>Delete</button>
+                  <button onClick={handleDelete} className={styles.deleteConfirmBtn}>Confirm Delete</button>
                   <button onClick={() => setConfirmDelete(false)} className={styles.cancelBtn}>Cancel</button>
                 </>
               ) : (
-                <button onClick={() => setConfirmDelete(true)} className={styles.deleteBtn}>Delete</button>
+                <>
+                  <button onClick={() => setConfirmDelete(true)} className={styles.deleteBtn}>Delete</button>
+                  <button onClick={() => navigate(`/admin/edit/${id}`, { state: { from: 'entry', collection: location.state?.collection ?? null } })} className={styles.editBtn}>Edit</button>
+                </>
               )}
             </>
           )}

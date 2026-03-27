@@ -302,6 +302,46 @@
   font-weight: 400;
 }
 
+.collectionTitle {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 2rem;
+  display: block;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  width: 100%;
+  padding: 0;
+}
+
+.collectionTitleClickable {
+  cursor: text;
+}
+
+.collectionRemoveBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.collectionRemoveCount {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 1.25rem;
+}
+
+.collectionRemoveHint {
+  font-size: 0.82rem;
+  color: #bbb;
+}
+
 /* Login form (renders in feedCol) */
 @keyframes fadeIn {
   from { opacity: 0; }

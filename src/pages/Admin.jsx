@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where, Timestamp } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { db, auth } from '../firebase/config'
 import { uploadImage } from '../utils/uploadImage'
 import { uploadVideo } from '../utils/uploadVideo'
@@ -18,6 +18,9 @@ const EMPTY_FORM = { title: '', date: '', locationName: '', notes: '', collectio
 export default function Admin() {
   const { id } = useParams()
   const isEdit = Boolean(id)
+  const location = useLocation()
+  const fromEntry = location.state?.from === 'entry'
+  const fromCollection = location.state?.collection ?? null
   const { setCoords } = useMapCoords()
   const { username } = useAuth()
   const navigate = useNavigate()
@@ -195,7 +198,7 @@ export default function Admin() {
       }
       if (isEdit) {
         await updateDoc(doc(db, 'entries', id), entryData)
-        navigate(`/${username}/entry/${id}`)
+        navigate(`/${username}/entry/${id}`, fromCollection ? { state: { collection: fromCollection } } : undefined)
       } else {
         await addDoc(collection(db, 'entries'), { ...entryData, createdAt: Timestamp.now(), uid: auth.currentUser.uid })
         mediaItems.filter(i => !i.saved).forEach(i => URL.revokeObjectURL(i.src))
@@ -269,7 +272,7 @@ export default function Admin() {
     <main className={styles.formCol}>
       <div className={styles.headerActions}>
         <div className={styles.headerLeft}>
-          <button onClick={() => navigate(`/${username}`, isDraft ? { state: { drafts: true } } : undefined)} className={styles.navBtn}>Back</button>
+          <button onClick={() => fromEntry ? navigate(`/${username}/entry/${id}`, fromCollection ? { state: { collection: fromCollection } } : undefined) : navigate(`/${username}`, isDraft ? { state: { drafts: true } } : undefined)} className={styles.navBtn}>Back</button>
         </div>
         <div className={styles.headerRight}>
           {isEdit && isDraft
@@ -398,9 +401,6 @@ export default function Admin() {
           <button type="button" className={styles.draftBtn} disabled={saving || savingDraft} onClick={handleSaveDraft}>
             {savingDraft ? 'Saving…' : isEdit && !isDraft ? 'Move to Drafts' : 'Save Draft'}
           </button>
-          {isEdit && !isDraft && (
-            <button type="button" className={styles.cancelBtn} onClick={() => navigate(`/${username}/entry/${id}`)}>Cancel</button>
-          )}
         </div>
       </form>
       </div>

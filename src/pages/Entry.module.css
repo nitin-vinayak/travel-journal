@@ -85,14 +85,13 @@
   background: transparent;
   border: none;
   font-size: 0.9rem;
-  font-weight: 600;
   cursor: pointer;
-  color: #c00;
+  color: #999;
   font-family: inherit;
   transition: color 0.2s ease;
 }
 
-.deleteConfirmBtn:hover { color: #900; }
+.deleteConfirmBtn:hover { color: #c00; }
 
 .meta {
   display: flex;
