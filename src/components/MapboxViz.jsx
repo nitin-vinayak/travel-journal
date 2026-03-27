@@ -8,6 +8,7 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
 const DEFAULT_CENTER = [20, 25]
 const DEFAULT_ZOOM = 1.8
 
+
 export default function MapboxViz({ lat, lng }) {
   const containerRef = useRef()
   const mapRef = useRef()
@@ -53,7 +54,7 @@ export default function MapboxViz({ lat, lng }) {
     })
 
     mapRef.current = map
-    markerRef.current = new mapboxgl.Marker({ color: '#000' })
+    markerRef.current = new mapboxgl.Marker({ color: '#000', scale: 0.7 })
 
     const ro = new ResizeObserver(() => map.resize())
     ro.observe(containerRef.current)
