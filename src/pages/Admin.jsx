@@ -8,6 +8,7 @@ import { uploadVideo } from '../utils/uploadVideo'
 import { loadGoogleMaps } from '../utils/loadGoogleMaps'
 import { useMapCoords } from '../context/MapCoordsContext'
 import { useAuth } from '../context/AuthContext'
+import RichTextEditor from '../components/RichTextEditor'
 import styles from './Admin.module.css'
 
 const EMPTY_FORM = { title: '', date: '', locationName: '', notes: '' }
@@ -301,7 +302,10 @@ export default function Admin() {
 
         <div className={styles.field}>
           <label className={styles.label}>Notes</label>
-          <textarea name="notes" value={form.notes} onChange={handleChange} className={styles.textarea} placeholder="Write about your day…" rows={8} />
+          <RichTextEditor
+            initialContent={form.notes}
+            onChange={v => setForm(prev => ({ ...prev, notes: v }))}
+          />
         </div>
 
         {/* Media */}

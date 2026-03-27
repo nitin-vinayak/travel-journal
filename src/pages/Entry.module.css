@@ -128,6 +128,13 @@
 }
 
 .notes p { margin-bottom: 1em; }
+.notes h2 { font-size: 1.15rem; font-weight: 600; margin: 1.25rem 0 0.4rem; color: #000; }
+.notes h3 { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.3rem; color: #000; }
+.notes ul, .notes ol { padding-left: 1.4rem; margin-bottom: 1em; }
+.notes li { margin-bottom: 0.25rem; }
+.notes strong { font-weight: 700; }
+.notes em { font-style: italic; }
+.notes s, .notes del { text-decoration: line-through; }
 
 /* Photos */
 .photos {

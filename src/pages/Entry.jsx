@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import { useMapCoords } from '../context/MapCoordsContext'
+import ReactMarkdown from 'react-markdown'
 import styles from './Entry.module.css'
 
 export default function Entry() {
@@ -97,9 +98,7 @@ export default function Entry() {
 
         {entry.notes && (
           <div className={styles.notes}>
-            {entry.notes.split('\n').map((para, i) =>
-              para.trim() ? <p key={i}>{para}</p> : <br key={i} />
-            )}
+            <ReactMarkdown>{entry.notes}</ReactMarkdown>
           </div>
         )}
 
