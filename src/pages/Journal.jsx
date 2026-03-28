@@ -397,7 +397,7 @@ export default function Journal() {
               )}
             </div>
           ) : showDrafts && !search.startsWith('@') ? (
-            <div className={styles.feed}>
+            <div key="drafts" className={styles.feed}>
               {drafts.length === 0 ? (
                 <span className={styles.noResults}>No drafts</span>
               ) : drafts.filter(entry => {
@@ -443,7 +443,7 @@ export default function Journal() {
               ))}
             </div>
           ) : showCollections ? (
-            <div className={styles.feed}>
+            <div key="collections" className={styles.feed}>
               {(() => {
                 const colMap = {}
                 entries.forEach(e => { if (e.collection) colMap[e.collection] = (colMap[e.collection] || 0) + 1 })
