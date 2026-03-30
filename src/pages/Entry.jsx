@@ -59,6 +59,7 @@ export default function Entry() {
 
   if (loading) return <div className={styles.loading}>Loading…</div>
   if (!entry)  return <div className={styles.loading}>Entry not found.</div>
+  if (entry.private && !isOwner) return <div className={styles.loading}>Entry not found.</div>
 
   const media = entry.media ?? [
     ...(entry.photos ?? []).map(url => ({ url, type: 'image' })),

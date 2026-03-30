@@ -91,7 +91,7 @@
 
 .untitled {
   color: #bbb;
-  font-style: italic;
+  font-style: normal;
 }
 
 .deleteBtn {
@@ -298,6 +298,11 @@
 .clearCollection:hover { color: #000; }
 
 .entryCollection {
+  color: #bbb;
+  font-weight: 400;
+}
+
+.privateLabel {
   color: #bbb;
   font-weight: 400;
 }
