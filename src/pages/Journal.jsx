@@ -65,7 +65,8 @@ export default function Journal() {
       const q = query(collection(db, 'entries'), where('uid', '==', uid), orderBy('date', 'desc'))
       const snapshot = await getDocs(q)
       const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
-      setEntries(all.filter(e => !e.draft))
+      const ownerViewing = auth.currentUser?.uid === uid
+      setEntries(all.filter(e => !e.draft && (!e.private || ownerViewing)))
       setDrafts(all.filter(e => e.draft))
       setLoading(false)
     }
@@ -384,7 +385,10 @@ export default function Journal() {
                         hoverTimer.current = setTimeout(() => setCoords({ lat: null, lng: null }), 150)
                       }}
                     >{entry.title}</h2>
-                    <span className={styles.date}>{formatDate(entry.date)}</span>
+                    <span className={styles.date}>
+                      {formatDate(entry.date)}
+                      {isOwner && entry.private && <span className={styles.privateLabel}> · Private</span>}
+                    </span>
                   </div>
                 </article>
               ))}
@@ -520,6 +524,7 @@ export default function Journal() {
                     <span className={styles.date}>
                       {formatDate(entry.date)}
                       {entry.collection && <span className={styles.entryCollection}> · {entry.collection}</span>}
+                      {isOwner && entry.private && <span className={styles.privateLabel}> · Private</span>}
                     </span>
                   </div>
                 </article>

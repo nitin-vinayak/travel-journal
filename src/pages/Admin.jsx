@@ -31,6 +31,7 @@ export default function Admin() {
   const [saving, setSaving] = useState(false)
   const [savingDraft, setSavingDraft] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
+  const [isPrivate, setIsPrivate] = useState(false)
   const [loading, setLoading] = useState(isEdit)
   const [error, setError] = useState('')
   const [locationSuggestions, setLocationSuggestions] = useState([])
@@ -78,6 +79,7 @@ export default function Admin() {
             ]
         setMediaItems(saved)
         setIsDraft(data.draft === true)
+        setIsPrivate(data.private === true)
         const coords = { lat: data.lat ?? null, lng: data.lng ?? null }
         setLocationCoords(coords)
         setCoords(coords)
@@ -195,10 +197,11 @@ export default function Admin() {
         collection: form.collection.trim() || null,
         media,
         draft: false,
+        private: isPrivate,
       }
       if (isEdit) {
         await updateDoc(doc(db, 'entries', id), entryData)
-        navigate(`/${username}/entry/${id}`, fromCollection ? { state: { collection: fromCollection } } : undefined)
+        navigate(`/${username}`, isDraft ? undefined : fromCollection ? { state: { collection: fromCollection } } : undefined)
       } else {
         await addDoc(collection(db, 'entries'), { ...entryData, createdAt: Timestamp.now(), uid: auth.currentUser.uid })
         mediaItems.filter(i => !i.saved).forEach(i => URL.revokeObjectURL(i.src))
@@ -235,6 +238,7 @@ export default function Admin() {
         collection: form.collection.trim() || null,
         media,
         draft: true,
+        private: isPrivate,
       }
       if (isEdit) {
         await updateDoc(doc(db, 'entries', id), entryData)
@@ -242,7 +246,7 @@ export default function Admin() {
         await addDoc(collection(db, 'entries'), { ...entryData, createdAt: Timestamp.now(), uid: auth.currentUser.uid })
         mediaItems.filter(i => !i.saved).forEach(i => URL.revokeObjectURL(i.src))
       }
-      navigate(`/${username}`)
+      navigate(`/${username}`, isEdit && isDraft ? { state: { drafts: true } } : undefined)
     } catch (err) {
       console.error(err)
       setError('Something went wrong. Please try again.')
@@ -400,6 +404,9 @@ export default function Admin() {
           </button>
           <button type="button" className={styles.draftBtn} disabled={saving || savingDraft} onClick={handleSaveDraft}>
             {savingDraft ? 'Saving…' : isEdit && !isDraft ? 'Move to Drafts' : 'Save Draft'}
+          </button>
+          <button type="button" className={`${styles.privateBtn} ${isPrivate ? styles.privateBtnActive : ''}`} onClick={() => setIsPrivate(v => !v)}>
+            Private
           </button>
         </div>
       </form>

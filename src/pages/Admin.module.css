@@ -288,6 +288,21 @@
 
 .cancelBtn:hover { color: #000; }
 
+.privateBtn {
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #ccc;
+  font-family: inherit;
+  transition: color 0.2s ease;
+  margin-left: auto;
+}
+
+.privateBtn:hover { color: #000; }
+.privateBtnActive { color: #000; }
+
 /* RIGHT — map */
 .mapCol {
   overflow: hidden;
