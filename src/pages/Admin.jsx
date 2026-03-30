@@ -38,7 +38,11 @@ export default function Admin() {
   const [locationCoords, setLocationCoords] = useState({ lat: null, lng: null })
   const [existingCollections, setExistingCollections] = useState([])
   const [collectionSuggestions, setCollectionSuggestions] = useState([])
+  const [tags, setTags] = useState([])
+  const [tagInput, setTagInput] = useState('')
+  const [tagSuggestions, setTagSuggestions] = useState([])
   const debounceRef = useRef(null)
+  const tagDebounceRef = useRef(null)
   const fileInputRef = useRef()
   const dragIndexRef = useRef(null)
 
@@ -80,6 +84,7 @@ export default function Admin() {
         setMediaItems(saved)
         setIsDraft(data.draft === true)
         setIsPrivate(data.private === true)
+        setTags(data.tags ?? [])
         const coords = { lat: data.lat ?? null, lng: data.lng ?? null }
         setLocationCoords(coords)
         setCoords(coords)
@@ -120,7 +125,36 @@ export default function Admin() {
     setCoords(coords)
   }
 
-  useEffect(() => () => clearTimeout(debounceRef.current), [])
+  useEffect(() => () => { clearTimeout(debounceRef.current); clearTimeout(tagDebounceRef.current) }, [])
+
+  function handleTagInput(e) {
+    const val = e.target.value
+    setTagInput(val)
+    clearTimeout(tagDebounceRef.current)
+    const prefix = val.replace(/^@/, '').toLowerCase().trim()
+    if (!prefix) { setTagSuggestions([]); return }
+    tagDebounceRef.current = setTimeout(async () => {
+      const snap = await getDocs(query(
+        collection(db, 'users'),
+        where('username', '>=', prefix),
+        where('username', '<=', prefix + '\uf8ff'),
+      ))
+      setTagSuggestions(snap.docs
+        .filter(d => d.id !== auth.currentUser?.uid && !tags.some(t => t.uid === d.id))
+        .map(d => ({ uid: d.id, username: d.data().username }))
+      )
+    }, 300)
+  }
+
+  function selectTag(tag) {
+    setTags(prev => [...prev, tag])
+    setTagInput('')
+    setTagSuggestions([])
+  }
+
+  function removeTag(uid) {
+    setTags(prev => prev.filter(t => t.uid !== uid))
+  }
 
   function addFiles(files) {
     const newItems = Array.from(files)
@@ -198,6 +232,7 @@ export default function Admin() {
         media,
         draft: false,
         private: isPrivate,
+        tags,
       }
       if (isEdit) {
         await updateDoc(doc(db, 'entries', id), entryData)
@@ -239,6 +274,7 @@ export default function Admin() {
         media,
         draft: true,
         private: isPrivate,
+        tags,
       }
       if (isEdit) {
         await updateDoc(doc(db, 'entries', id), entryData)
@@ -347,6 +383,37 @@ export default function Admin() {
               {collectionSuggestions.map((c, i) => (
                 <li key={i} className={styles.suggestion} onMouseDown={() => { setForm(prev => ({ ...prev, collection: c })); setCollectionSuggestions([]) }}>
                   {c}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className={styles.field} style={{ position: 'relative' }}>
+          <label className={styles.label}>People <span className={styles.optional}>(optional)</span></label>
+          {tags.length > 0 && (
+            <div className={styles.tagChips}>
+              {tags.map(t => (
+                <span key={t.uid} className={styles.tagChip}>
+                  @{t.username}
+                  <button type="button" className={styles.tagChipRemove} onClick={() => removeTag(t.uid)}>×</button>
+                </span>
+              ))}
+            </div>
+          )}
+          <input
+            value={tagInput}
+            onChange={handleTagInput}
+            onBlur={() => setTimeout(() => setTagSuggestions([]), 200)}
+            className={styles.input}
+            placeholder="Search by username…"
+            autoComplete="off"
+          />
+          {tagSuggestions.length > 0 && (
+            <ul className={styles.suggestions}>
+              {tagSuggestions.map(t => (
+                <li key={t.uid} className={styles.suggestion} onMouseDown={() => selectTag(t)}>
+                  @{t.username}
                 </li>
               ))}
             </ul>

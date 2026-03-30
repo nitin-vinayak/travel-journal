@@ -120,6 +120,22 @@
   line-height: 1.2;
 }
 
+.taggedUsers {
+  font-size: 0.82rem;
+  color: #999;
+  margin-top: 0.4rem;
+  margin-bottom: 0;
+}
+
+.tagLink {
+  color: #000;
+  text-decoration: none;
+}
+
+.tagLink:hover {
+  text-decoration: underline;
+}
+
 .notes {
   font-size: 0.92rem;
   line-height: 1.8;

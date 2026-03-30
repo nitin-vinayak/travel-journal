@@ -303,6 +303,37 @@
 .privateBtn:hover { color: #000; }
 .privateBtnActive { color: #000; }
 
+.tagChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: #000;
+  border: 1px solid #000;
+  padding: 0.2rem 0.5rem;
+}
+
+.tagChipRemove {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #999;
+  padding: 0;
+  line-height: 1;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+
+.tagChipRemove:hover { color: #000; }
+
 /* RIGHT — map */
 .mapCol {
   overflow: hidden;

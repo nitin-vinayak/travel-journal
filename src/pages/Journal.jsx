@@ -65,8 +65,9 @@ export default function Journal() {
       const q = query(collection(db, 'entries'), where('uid', '==', uid), orderBy('date', 'desc'))
       const snapshot = await getDocs(q)
       const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
-      const ownerViewing = auth.currentUser?.uid === uid
-      setEntries(all.filter(e => !e.draft && (!e.private || ownerViewing)))
+      const myUid = auth.currentUser?.uid
+      const ownerViewing = myUid === uid
+      setEntries(all.filter(e => !e.draft && (!e.private || ownerViewing || (myUid && (e.tags ?? []).some(t => t.uid === myUid)))))
       setDrafts(all.filter(e => e.draft))
       setLoading(false)
     }

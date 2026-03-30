@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { doc, getDoc, deleteDoc } from 'firebase/firestore'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import { useMapCoords } from '../context/MapCoordsContext'
@@ -57,9 +57,11 @@ export default function Entry() {
     })
   }
 
+  const isTagged = (entry?.tags ?? []).some(t => t.uid === user?.uid)
+
   if (loading) return <div className={styles.loading}>Loading…</div>
   if (!entry)  return <div className={styles.loading}>Entry not found.</div>
-  if (entry.private && !isOwner) return <div className={styles.loading}>Entry not found.</div>
+  if (entry.private && !isOwner && !isTagged) return <div className={styles.loading}>Entry not found.</div>
 
   const media = entry.media ?? [
     ...(entry.photos ?? []).map(url => ({ url, type: 'image' })),
@@ -101,6 +103,17 @@ export default function Entry() {
         </div>
 
         <h1 className={styles.title}>{entry.title}</h1>
+
+        {entry.tags?.length > 0 && (
+          <p className={styles.taggedUsers}>
+            with {entry.tags.map((t, i) => (
+              <span key={t.uid}>
+                <Link to={`/${t.username}`} className={styles.tagLink}>@{t.username}</Link>
+                {i < entry.tags.length - 1 && ', '}
+              </span>
+            ))}
+          </p>
+        )}
 
         {entry.notes && (
           <div className={styles.notes}>
