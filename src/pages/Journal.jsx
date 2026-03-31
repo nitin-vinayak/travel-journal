@@ -6,6 +6,7 @@ import { db, auth } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import { useMapCoords } from '../context/MapCoordsContext'
 import styles from './Journal.module.css'
+import CalendarModal from '../components/CalendarModal'
 
 export default function Journal() {
   const { username: profileUsername } = useParams()
@@ -31,6 +32,7 @@ export default function Journal() {
   const [selected, setSelected] = useState(new Set())
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
   const [search, setSearch] = useState('')
   const [userResults, setUserResults] = useState([])
   const [userSearching, setUserSearching] = useState(false)
@@ -307,7 +309,10 @@ export default function Journal() {
                 ) : (
                   <>
                     {!showDrafts && !showCollections && (
-                      <button onClick={() => { setShowCollections(true); setSearch('') }} className={styles.navBtn}>Collections</button>
+                      <>
+                        <button onClick={() => { setShowCollections(true); setSearch('') }} className={styles.navBtn}>Collections</button>
+                        <button onClick={() => setShowCalendar(true)} className={styles.navBtn}>Cal</button>
+                      </>
                     )}
                     {!showCollections && <button onClick={toggleEditMode} className={styles.editModeBtn}>Edit</button>}
                     <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
@@ -332,7 +337,10 @@ export default function Journal() {
               </div>
               <div className={styles.headerRight}>
                 {!showCollections && !collectionView && (
-                  <button onClick={() => { setShowCollections(true); setSearch('') }} className={styles.navBtn}>Collections</button>
+                  <>
+                    <button onClick={() => { setShowCollections(true); setSearch('') }} className={styles.navBtn}>Collections</button>
+                    <button onClick={() => setShowCalendar(true)} className={styles.navBtn}>Cal</button>
+                  </>
                 )}
                 {user
                   ? (myUsername && <button onClick={() => navigate(`/${myUsername}`)} className={styles.navBtn}>My Journal</button>)
@@ -536,6 +544,10 @@ export default function Journal() {
         </div>
 
       </div>
+
+      {showCalendar && (
+        <CalendarModal onClose={() => setShowCalendar(false)} />
+      )}
     </main>
   )
 }
