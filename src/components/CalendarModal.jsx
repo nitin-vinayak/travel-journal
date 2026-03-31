@@ -4,7 +4,7 @@ import styles from './CalendarModal.module.css'
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December']
 
-export default function CalendarModal({ closing, onClose, onAnimationEnd }) {
+export default function CalendarModal({ closing, onClose, onAnimationEnd, onSelectDate }) {
   const today = new Date()
   const [display, setDisplay] = useState({ year: today.getFullYear(), month: today.getMonth() })
   const [view, setView] = useState('calendar') // 'calendar' | 'monthPicker' | 'yearPicker'
@@ -124,7 +124,8 @@ export default function CalendarModal({ closing, onClose, onAnimationEnd }) {
               {cells.map((day, i) => (
                 <div
                   key={i}
-                  className={`${styles.cell} ${isCurrentMonth && day === today.getDate() ? styles.today : ''}`}
+                  className={`${styles.cell} ${isCurrentMonth && day === today.getDate() ? styles.today : ''} ${day ? styles.clickable : ''}`}
+                  onClick={day ? () => onSelectDate(new Date(year, month, day)) : undefined}
                 >
                   {day && (
                     <span className={styles.dayNum}>{day}</span>

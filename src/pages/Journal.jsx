@@ -34,6 +34,7 @@ export default function Journal() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
   const [calendarClosing, setCalendarClosing] = useState(false)
+  const [dateFilter, setDateFilter] = useState(null)
   const [search, setSearch] = useState('')
   const [userResults, setUserResults] = useState([])
   const [userSearching, setUserSearching] = useState(false)
@@ -482,6 +483,12 @@ export default function Journal() {
           ) : entries.length > 0 && (() => {
             const filtered = entries.filter(entry => {
               if (activeCollection && entry.collection !== activeCollection) return false
+              if (dateFilter) {
+                const d = entry.date.toDate()
+                if (d.getFullYear() !== dateFilter.getFullYear() ||
+                    d.getMonth() !== dateFilter.getMonth() ||
+                    d.getDate() !== dateFilter.getDate()) return false
+              }
               if (!search.trim()) return true
               const q = search.toLowerCase()
               return entry.title.toLowerCase().includes(q) ||
@@ -490,14 +497,20 @@ export default function Journal() {
                 (entry.collection ?? '').toLowerCase().includes(q)
             })
             return (
-            <div key="feed" className={styles.feed}>
+            <div key={`feed-${dateFilter?.getTime() ?? 'all'}`} className={styles.feed}>
+              {dateFilter && (
+                <div className={styles.activeCollection}>
+                  {dateFilter.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  <button className={styles.clearCollection} onClick={() => setDateFilter(null)}>×</button>
+                </div>
+              )}
               {activeCollection && (
                 <div className={styles.activeCollection}>
                   {activeCollection}
                   <button className={styles.clearCollection} onClick={() => setActiveCollection(null)}>×</button>
                 </div>
               )}
-              <span className={styles.resultCount} style={{ visibility: search.trim() || activeCollection ? 'visible' : 'hidden' }}>
+              <span className={styles.resultCount} style={{ visibility: search.trim() || activeCollection || dateFilter ? 'visible' : 'hidden' }}>
                 {filtered.length} {filtered.length === 1 ? 'entry' : 'entries'}
               </span>
               {filtered.map(entry => (
@@ -551,6 +564,7 @@ export default function Journal() {
           closing={calendarClosing}
           onClose={() => setCalendarClosing(true)}
           onAnimationEnd={() => { setShowCalendar(false); setCalendarClosing(false) }}
+          onSelectDate={date => { setDateFilter(date); setCalendarClosing(true) }}
         />
       )}
     </main>
