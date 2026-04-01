@@ -38,10 +38,14 @@ export default function Journal() {
   const [search, setSearch] = useState('')
   const [userResults, setUserResults] = useState([])
   const [userSearching, setUserSearching] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [menuClosing, setMenuClosing] = useState(false)
   const userSearchTimer = useRef(null)
   const searchRef = useRef(null)
   const hoverTimer = useRef(null)
   const navigate = useNavigate()
+
+  function closeMenu() { setMenuClosing(true) }
 
   const isOwner = user && profileUid && user.uid === profileUid
 
@@ -283,10 +287,7 @@ export default function Journal() {
                       )}
                     </>
                   ) : (
-                    <>
-                      <button onClick={() => setCollectionEditMode(true)} className={styles.editModeBtn}>Edit</button>
-                      <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
-                    </>
+                    <button onClick={() => setCollectionEditMode(true)} className={styles.editModeBtn}>Edit</button>
                   )
                 ) : editMode ? (
                   <>
@@ -309,16 +310,7 @@ export default function Journal() {
                     )}
                   </>
                 ) : (
-                  <>
-                    {!showDrafts && !showCollections && (
-                      <>
-                        <button onClick={() => { setShowCollections(true); setSearch('') }} className={styles.navBtn}>Collections</button>
-                        <button onClick={() => setShowCalendar(true)} className={styles.navBtn}>Cal</button>
-                      </>
-                    )}
-                    {!showCollections && <button onClick={toggleEditMode} className={styles.editModeBtn}>Edit</button>}
-                    <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
-                  </>
+                  !showCollections && <button className={styles.navBtn} onClick={() => setShowMenu(true)}>Menu</button>
                 )}
               </div>
             </>
@@ -338,16 +330,7 @@ export default function Journal() {
                 />
               </div>
               <div className={styles.headerRight}>
-                {!showCollections && !collectionView && (
-                  <>
-                    <button onClick={() => { setShowCollections(true); setSearch('') }} className={styles.navBtn}>Collections</button>
-                    <button onClick={() => setShowCalendar(true)} className={styles.navBtn}>Cal</button>
-                  </>
-                )}
-                {user
-                  ? (myUsername && <button onClick={() => navigate(`/${myUsername}`)} className={styles.navBtn}>My Journal</button>)
-                  : <button onClick={() => navigate('/login')} className={styles.navBtn}>Login</button>
-                }
+                <button className={styles.navBtn} onClick={() => setShowMenu(true)}>Menu</button>
               </div>
             </>
           )}
@@ -558,6 +541,44 @@ export default function Journal() {
         </div>
 
       </div>
+
+      {showMenu && (
+        <div
+          className={`${styles.menuOverlay} ${menuClosing ? styles.menuOverlayClosing : ''}`}
+          onClick={closeMenu}
+          onAnimationEnd={menuClosing ? () => { setShowMenu(false); setMenuClosing(false) } : undefined}
+        >
+          <div className={styles.menuItems} onClick={e => e.stopPropagation()}>
+            {isOwner ? (
+              <>
+                {!showDrafts && !showCollections && (
+                  <>
+                    <button onClick={() => { setShowCollections(true); setSearch(''); closeMenu() }} className={styles.menuItem}>Collections</button>
+                    <button onClick={() => { setShowCalendar(true); closeMenu() }} className={styles.menuItem}>Calendar</button>
+                  </>
+                )}
+                {!showCollections && (
+                  <button onClick={() => { toggleEditMode(); closeMenu() }} className={styles.menuItem}>Edit</button>
+                )}
+                <button onClick={handleLogout} className={styles.menuItem}>Logout</button>
+              </>
+            ) : (
+              <>
+                {!showCollections && !collectionView && (
+                  <>
+                    <button onClick={() => { setShowCollections(true); setSearch(''); closeMenu() }} className={styles.menuItem}>Collections</button>
+                    <button onClick={() => { setShowCalendar(true); closeMenu() }} className={styles.menuItem}>Calendar</button>
+                  </>
+                )}
+                {user
+                  ? (myUsername && <button onClick={() => { navigate(`/${myUsername}`); closeMenu() }} className={styles.menuItem}>My Journal</button>)
+                  : <button onClick={() => { navigate('/login'); closeMenu() }} className={styles.menuItem}>Login</button>
+                }
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {showCalendar && (
         <CalendarModal
