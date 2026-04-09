@@ -4,7 +4,7 @@ import styles from './CalendarModal.module.css'
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December']
 
-export default function CalendarModal({ closing, onClose, onAnimationEnd, onSelectDate }) {
+export default function CalendarModal({ closing, onClose, onAnimationEnd, onSelectDate, entries = [] }) {
   const today = new Date()
   const [display, setDisplay] = useState({ year: today.getFullYear(), month: today.getMonth() })
   const [view, setView] = useState('calendar') // 'calendar' | 'monthPicker' | 'yearPicker'
@@ -22,6 +22,13 @@ export default function CalendarModal({ closing, onClose, onAnimationEnd, onSele
   for (let i = 0; i < startDow; i++) cells.push(null)
   for (let d = 1; d <= totalDays; d++) cells.push(d)
   while (cells.length < 42) cells.push(null)
+
+  const entryDays = new Set(
+    entries.map(e => {
+      const d = e.date.toDate()
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+    })
+  )
 
   const isCurrentMonth = year === today.getFullYear() && month === today.getMonth()
   const monthLabel = MONTH_NAMES[month].toUpperCase()
@@ -128,7 +135,7 @@ export default function CalendarModal({ closing, onClose, onAnimationEnd, onSele
                   onClick={day ? () => onSelectDate(new Date(year, month, day)) : undefined}
                 >
                   {day && (
-                    <span className={styles.dayNum}>{day}</span>
+                    <span className={`${styles.dayNum} ${entryDays.has(`${year}-${month}-${day}`) ? styles.dayNumCircle : ''}`}>{day}</span>
                   )}
                 </div>
               ))}
