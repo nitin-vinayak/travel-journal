@@ -102,14 +102,21 @@ export default function Journal() {
           searchRef.current?.focus()
         }
       }
-      if (e.key === 'Escape') {
-        closeMenu()
-        document.activeElement?.blur()
-      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        if (showMenu) { closeMenu(); document.activeElement?.blur() }
+        if (showCalendar) { setCalendarClosing(true); document.activeElement?.blur() }
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showMenu, showCalendar])
 
   useEffect(() => {
     if (!search.startsWith('@')) { setUserResults([]); return }

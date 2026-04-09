@@ -16,8 +16,6 @@ export default function GlobeViz({ lat, lng }) {
     return () => ro.disconnect()
   }, [])
 
-  const userInteracted = useRef(false)
-
   useEffect(() => {
     if (!globeRef.current) return
     globeRef.current.pointOfView({ lat: 23.4, lng: 53.8, altitude: 2.5 })
@@ -33,7 +31,6 @@ export default function GlobeViz({ lat, lng }) {
     controls.autoRotateSpeed = 0.6
 
     function onInteract() {
-      userInteracted.current = true
       controls.autoRotate = false
     }
     controls.addEventListener('start', onInteract)

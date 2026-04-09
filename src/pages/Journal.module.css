@@ -81,9 +81,6 @@
   color: #000;
 }
 
-.navBtnActive {
-  color: #000;
-}
 
 .draftEntry {
   cursor: pointer;
@@ -123,11 +120,6 @@
   opacity: 0.5;
 }
 
-.loading {
-  padding: 3rem;
-  font-size: 0.85rem;
-  color: #999;
-}
 
 /* Feed */
 .feed {
@@ -369,27 +361,6 @@
   to { opacity: 0; }
 }
 
-.collectionRemoveBar {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #f0f0f0;
-}
-
-.collectionRemoveCount {
-  display: block;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 1.25rem;
-}
-
-.collectionRemoveHint {
-  font-size: 0.82rem;
-  color: #bbb;
-}
 
 /* Login form (renders in feedCol) */
 @keyframes fadeIn {

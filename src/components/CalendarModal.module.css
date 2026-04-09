@@ -83,20 +83,6 @@
   color: #000;
 }
 
-.yearInput {
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: #000;
-  letter-spacing: 0.06em;
-  border: none;
-  border-bottom: 1px solid #000;
-  background: transparent;
-  outline: none;
-  width: 3.5rem;
-  text-align: center;
-  font-family: inherit;
-  padding: 0 0 1px;
-}
 
 .backBtn {
   background: transparent;
@@ -113,20 +99,6 @@
   color: #000;
 }
 
-.navArrow {
-  background: transparent;
-  border: none;
-  font-size: 1.4rem;
-  color: #ccc;
-  cursor: pointer;
-  padding: 0 0.5rem;
-  line-height: 1;
-  transition: color 0.15s;
-}
-
-.navArrow:hover {
-  color: #000;
-}
 
 .gridWrap {
   flex: 1;
@@ -226,15 +198,6 @@
 }
 
 
-.yearSelected .yearCellNum {
-  color: #000;
-  font-weight: 600;
-}
-
-.yearToday .yearCellNum {
-  font-weight: 700;
-  color: #000;
-}
 
 @keyframes fadeIn {
   from { opacity: 0; }

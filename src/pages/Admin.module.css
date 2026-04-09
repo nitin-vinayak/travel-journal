@@ -120,21 +120,6 @@
 .input:focus { border-bottom-color: #000; }
 .input::placeholder { color: #ccc; }
 
-.textarea {
-  padding: 0.5rem 0;
-  border: none;
-  font-size: 0.9rem;
-  color: #000;
-  background: transparent;
-  outline: none;
-  resize: none;
-  line-height: 1.7;
-  font-family: inherit;
-  transition: border-color 0.15s;
-}
-
-.textarea:focus { border-bottom-color: #000; }
-.textarea::placeholder { color: #ccc; }
 
 .suggestions {
   position: absolute;
@@ -334,15 +319,8 @@
 
 .tagChipRemove:hover { color: #000; }
 
-/* RIGHT — map */
-.mapCol {
-  overflow: hidden;
-  position: relative;
-}
-
 @media (max-width: 768px) {
   .page { height: auto; overflow: auto; }
   .layout { grid-template-columns: 1fr; overflow: visible; }
   .formCol { padding: 48px 24px; }
-  .mapCol { height: 50vh; }
 }
