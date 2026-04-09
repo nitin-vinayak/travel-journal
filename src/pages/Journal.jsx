@@ -593,6 +593,7 @@ export default function Journal() {
           onClose={() => setCalendarClosing(true)}
           onAnimationEnd={() => { setShowCalendar(false); setCalendarClosing(false) }}
           onSelectDate={date => { setDateFilter(date); setCalendarClosing(true) }}
+          entries={entries}
         />
       )}
     </main>

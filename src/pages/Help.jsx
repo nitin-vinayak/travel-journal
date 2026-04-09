@@ -55,6 +55,7 @@ export default function Help() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Calendar</h2>
           <p className={styles.sectionText}>Use the calendar to filter your journal entries by date. Access it from the <strong>Menu</strong> and select a day to see all entries from that date.</p>
+          <p className={styles.sectionText}>Days with entries are marked with a circle around the date.</p>
           <p className={styles.sectionText}>To clear the filter, tap the <strong>×</strong> next to the date at the top of your journal.</p>
         </section>
       </div>

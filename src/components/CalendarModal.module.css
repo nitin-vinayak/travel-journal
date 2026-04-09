@@ -20,7 +20,22 @@
   width: 80vw;
   max-width: 900px;
   height: 85vh;
+  max-height: 800px;
   font-family: inherit;
+}
+
+@media (min-width: 1600px) {
+  .modal {
+    max-width: 1150px;
+    max-height: 1000px;
+  }
+}
+
+@media (min-width: 2200px) {
+  .modal {
+    max-width: 1450px;
+    max-height: 1260px;
+  }
 }
 
 .header {
@@ -162,6 +177,21 @@
 
 .cell:hover .dayNum {
   color: #000;
+}
+
+.dayNumCircle {
+  border: 1.5px solid #bbb;
+  border-radius: 50%;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+}
+
+.cell:hover .dayNumCircle {
+  border-color: #000;
 }
 
 
