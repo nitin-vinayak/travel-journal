@@ -102,6 +102,10 @@ export default function Journal() {
           searchRef.current?.focus()
         }
       }
+      if (e.key === 'Escape') {
+        closeMenu()
+        document.activeElement?.blur()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -310,7 +314,12 @@ export default function Journal() {
                     )}
                   </>
                 ) : (
-                  !showCollections && <button className={styles.navBtn} onClick={() => setShowMenu(true)}>Menu</button>
+                  !showCollections && (
+                    <>
+                      <button onClick={toggleEditMode} className={styles.navBtn}>Edit</button>
+                      <button className={styles.navBtn} onClick={() => setShowMenu(true)}>Menu</button>
+                    </>
+                  )
                 )}
               </div>
             </>
@@ -557,9 +566,7 @@ export default function Journal() {
                     <button onClick={() => { setShowCalendar(true); closeMenu() }} className={styles.menuItem}>Calendar</button>
                   </>
                 )}
-                {!showCollections && (
-                  <button onClick={() => { toggleEditMode(); closeMenu() }} className={styles.menuItem}>Edit</button>
-                )}
+                <button onClick={() => { navigate('/help'); closeMenu() }} className={styles.menuItem}>App Guide</button>
                 <button onClick={handleLogout} className={styles.menuItem}>Logout</button>
               </>
             ) : (

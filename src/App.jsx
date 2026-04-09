@@ -7,6 +7,7 @@ import Admin from './pages/Admin'
 import Entry from './pages/Entry'
 import Login from './pages/Login'
 import SetUsername from './pages/SetUsername'
+import Help from './pages/Help'
 
 function RootRedirect() {
   const { user, username } = useAuth()
@@ -34,6 +35,7 @@ function App() {
             <Route path="/admin/edit/:id" element={
               <ProtectedRoute><Admin /></ProtectedRoute>
             } />
+            <Route path="/help" element={<Help />} />
             <Route path="/:username" element={<Journal />} />
             <Route path="/:username/entry/:id" element={<Entry />} />
           </Route>
